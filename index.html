@@ -111,19 +111,26 @@
         .meta-title { font-size: var(--font-lg); color: var(--main-color); font-weight: 900; margin-bottom: 1vh; }
         .meta-desc { font-size: var(--font-sm); color: #999; margin-bottom: 1vh; }
         
+        /* --- ESTILOS DA NOVA CAIXA DE INFORMAÇÕES --- */
+        .account-info-box {
+            display: flex;
+            justify-content: space-around;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 1.5vh;
+            margin-top: auto; /* Empurra a caixa para baixo */
+            margin-bottom: 2vh;
+            flex-shrink: 0;
+        }
+        .info-block { display: flex; flex-direction: column; align-items: center; gap: 0.5vh; }
+        .info-label { font-size: var(--font-xs); color: #888; font-weight: 800; text-transform: uppercase; }
+        .info-value { font-size: var(--font-sm); color: #fff; font-weight: 800; display: flex; align-items: center; gap: 0.5vw; }
+        /* -------------------------------------------- */
+
         .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid #1a1a1a; flex-shrink: 0; }
         .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 700; background: #1a1a1a; border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
-
-        .quick-user-info {
-            display: flex; justify-content: space-around; align-items: center;
-            background: #0a0a0c; border: 1px solid #222; border-radius: 1vh;
-            padding: 2vh; margin-top: auto; margin-bottom: 2vh;
-        }
-        .info-block { text-align: center; flex: 1; }
-        .info-label { font-size: 1.4vh; color: #888; font-weight: 800; text-transform: uppercase; margin-bottom: 0.8vh; }
-        .info-val { font-size: 2vh; color: #fff; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 0.5vw; }
-        .info-val i { color: var(--main-color); }
 
         #loader { background: #000; z-index: 20000; flex-direction: column; color: var(--main-color); font-weight: 900; font-size: var(--font-lg); }
         
@@ -200,24 +207,23 @@
             </div>
             
             <div class="meta">
-                <div id="meta-title" class="meta-title"><span style="color:#fff">IPTV</span>&nbsp;<span style="color:var(--main-color);">OSCORP</span></div>
+                <div id="meta-title" class="meta-title"><span style="color:#fff">IPTV</span>&nbsp;OSCORP</div>
                 <div id="meta-desc" class="meta-desc">Selecione um canal para assistir</div>
                 
-                <div id="quick-user-info" class="quick-user-info hide">
+                <div id="account-info-box" class="account-info-box">
                     <div class="info-block">
-                        <div class="info-label">USUÁRIO</div>
-                        <div class="info-val"><i class="fas fa-user"></i> <span id="q-user">...</span></div>
+                        <div class="info-label">Usuário</div>
+                        <div class="info-value"><i class="fas fa-user theme-text"></i> <span id="info-user">...</span></div>
                     </div>
                     <div class="info-block">
                         <div class="info-label">VENCIMENTO</div>
-                        <div class="info-val"><i class="far fa-calendar-alt"></i> <span id="q-exp">...</span></div>
+                        <div class="info-value"><i class="far fa-calendar-alt theme-text"></i> <span id="info-exp">...</span></div>
                     </div>
                     <div class="info-block">
                         <div class="info-label">TELAS</div>
-                        <div class="info-val"><i class="fas fa-tv"></i> <span id="q-conn">...</span></div>
+                        <div class="info-value"><i class="fas fa-tv theme-text"></i> <span id="info-conn">...</span></div>
                     </div>
                 </div>
-
                 <div class="keys">
                     <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000; box-shadow: 0 0 10px #FF0000;"></div> TELA CHEIA</div>
                     <div class="key" id="key-top"><div class="dot" style="background-color:#00C851; box-shadow: 0 0 10px #00C851;"></div> TOPO</div>
@@ -413,14 +419,15 @@
                     }
                     if(d && d.user_info && d.user_info.auth==1) {
                         App.creds={h:h,u:u,p:p}; localStorage.setItem('rc_h', h); localStorage.setItem('rc_u', u); localStorage.setItem('rc_p', p); App.userInfo = d.user_info; var info = d.user_info;
-                        var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unlimited; var conn = (info.active_cons || 0) + " / " + (info.max_connections || 1);
+                        var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unlimited; 
+                        var conn = (info.active_cons || 0) + " / " + (info.max_connections || 1);
+                        
                         document.getElementById('set-user').innerText = info.username || u; document.getElementById('set-exp').innerText = exp; document.getElementById('set-conn').innerText = (info.max_connections || 1);
                         
-                        // Preenche os dados da nova caixa
-                        document.getElementById('q-user').innerText = info.username || u;
-                        document.getElementById('q-exp').innerText = exp;
-                        document.getElementById('q-conn').innerText = conn;
-                        document.getElementById('quick-user-info').classList.remove('hide');
+                        // Atualiza a nova caixa de informações
+                        var infoUserEl = document.getElementById('info-user'); if(infoUserEl) infoUserEl.innerText = info.username || u;
+                        var infoExpEl = document.getElementById('info-exp'); if(infoExpEl) infoExpEl.innerText = exp;
+                        var infoConnEl = document.getElementById('info-conn'); if(infoConnEl) infoConnEl.innerText = conn;
                         
                         App.openMode(); // Vai direto para TV Ao Vivo
                     } else { App.setScr(0); document.getElementById('msg-login').innerText = App.i18n[App.cfg.lang].err_auth; localStorage.clear(); }
@@ -485,8 +492,9 @@
                 });
             },
             
+            // Alterado para mostrar a mensagem padrão no início
             resetInfo: function() { 
-                document.getElementById('meta-title').innerHTML = '<span style="color:#fff">IPTV</span>&nbsp;<span style="color:var(--main-color);">OSCORP</span>'; 
+                document.getElementById('meta-title').innerHTML = '<span style="color:#fff">IPTV</span>&nbsp;OSCORP'; 
                 document.getElementById('meta-desc').innerText = "Selecione um canal para assistir"; 
                 PlayerEngine.hardStop(); 
             },
