@@ -601,7 +601,6 @@
 
             renderList: function(append) {
                 var d = this.fullData; var max = d.length; var t = App.i18n[App.cfg.lang]; var listEl = document.getElementById('item-list'); 
-                var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = t.tot_pre + max;
                 if(max===0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; return; }
 
                 if(!append) { 
@@ -726,7 +725,7 @@
                             }
                             d = null; 
                             if (res.length > 0) { res.sort(App.smartSort); App.fullData = res; App.zone = 2; App.idx = 0; App.renderList(false); } 
-                            else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum resultado encontrado no servidor global.</div>'; var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = App.i18n[App.cfg.lang].tot_pre + "0"; }
+                            else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum resultado encontrado no servidor global.</div>'; }
                         } else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Erro na conexão com o servidor.</div>'; }
                     });
                 } else {
