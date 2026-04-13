@@ -16,7 +16,7 @@
     <style>
         :root {
             --bg-deep: #000000;
-            --main-color: #FFD700; /* Tom GOLD */
+            --main-color: #FFD700;
             --font-xs: 1.8vh; --font-sm: 2.2vh; --font-md: 3vh; --font-lg: 5vh;
         }
 
@@ -51,7 +51,6 @@
         .focused { 
             border: 3px solid #fff !important; background: var(--main-color) !important; color: #000 !important; 
             z-index: 50; box-shadow: none !important; transform: scale(1.02) translateZ(0) !important;
-            transition: transform 0.1s ease-out, background 0.1s;
         }
         .focused i, .focused span, .focused div { color: #000 !important; }
         
@@ -69,12 +68,6 @@
         .toggle-btn { flex: 1; padding: 1.5vh; background: #1a1a1a; border: 1px solid #333; color: #888; font-size: var(--font-sm); font-weight: 800; border-radius: 1vh; }
         .info-row { display: flex; justify-content: space-between; padding: 1vh 0; border-bottom: 1px solid #222; font-size: var(--font-sm); color: #ccc; }
         
-        @keyframes pulse-btn {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
-            50% { transform: scale(1.15); box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
-        }
-
         #content-layer { display: flex; width: 100%; height: 100%; background: #000; overflow: hidden; }
         .col-cat { width: 25%; background: #08080a; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; height: 100%; overflow: hidden; }
         .col-list { width: 35%; background: #101014; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; height: 100%; overflow: hidden; }
@@ -83,7 +76,7 @@
         .cat-head { padding: 15px; background: #15151a; color: var(--main-color); border-bottom: 2px solid #222; text-align: center; font-size: var(--font-md); font-weight: 900; flex-shrink: 0; }
         .cat-top-row { display: flex; align-items: center; width: 100%; }
         
-        .cat-list, .item-list { flex: 1; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; will-change: transform; transform: translateZ(0); touch-action: pan-y; }
+        .cat-list, .item-list { flex: 1; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; transform: translateZ(0); }
         
         .cat-item, .item { padding: 14px 20px; border-radius: 6px; margin: 6px 12px; color: #888; font-size: var(--font-sm); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; }
         .cat-item.active { background: #1a1a1a; color: #fff; border-left: 4px solid var(--main-color); }
@@ -97,7 +90,7 @@
 
         .vid-box { 
             width: 100%; height: 50vh; background: #000; position: relative; border-bottom: 2px solid #222; overflow: hidden; flex-shrink: 0;
-            touch-action: manipulation; transform: translateZ(0); 
+            transform: translateZ(0); 
         }
         
         #player-container { width:100%; height:100%; background:#000; transform: translateZ(0); }
@@ -233,9 +226,7 @@
             if (!vidElement) return;
             try { 
                 var p = vidElement.play(); 
-                if (p !== undefined && typeof p.catch === 'function') { 
-                    p.catch(function(e) {}); 
-                } 
+                if (p !== undefined && typeof p.catch === 'function') { p.catch(function(e) {}); } 
             } catch (e) {}
         }
 
@@ -433,15 +424,15 @@
 
             countGlobal: function() {
                 var t = App.i18n; var countEl = document.getElementById('item-count');
-                var cacheKey = 'rc_total_live_' + App.creds.u; var cached = localStorage.getItem(cacheKey);
-                if(cached) { if(countEl) countEl.innerText = t.tot_pre + cached + " " + t.tot_chan; } else { if(countEl) countEl.innerText = "CONTANDO..."; }
+                if(countEl) countEl.innerText = "CONTANDO...";
 
                 this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams", function(d){
-                    if(d && d!=='ERR_NET') {
+                    if(d && Array.isArray(d)) {
                         var total = 0; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado'];
                         if(App.cfg.filter) { for(var i=0; i<d.length; i++) { var nome = (d[i].name || d[i].title || "").toLowerCase(); var show = true; for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } } if(show) total++; } } else { total = d.length; }
-                        d = null; try { localStorage.setItem(cacheKey, total); } catch(e) {}
                         if(countEl) countEl.innerText = t.tot_pre + total + " " + t.tot_chan;
+                    } else {
+                        if(countEl) countEl.innerText = t.tot_pre + "0";
                     }
                 });
             },
@@ -454,7 +445,8 @@
                 
                 PlayerEngine.hardStop(); this.resetInfo(); requestNativeFullscreen();
                 this.playingId = null; this.validCategories = null; this.setScr(2);
-                var t = App.i18n; document.getElementById('search').value = ''; setTimeout(function() { App.countGlobal(); }, 500); 
+                var t = App.i18n; document.getElementById('search').value = ''; 
+                setTimeout(function() { App.countGlobal(); }, 500); 
                 
                 var renderCats = function(d) {
                     var h = []; h.push('<div class="cat-item" role="button" tabindex="-1" id="c0" data-id="fav" onclick="App.catClick(0, true)">' + t.cat_fav + '</div>'); 
@@ -468,7 +460,7 @@
                 };
 
                 this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_categories", function(d){
-                    if(d && d!=='ERR_NET') { renderCats(d); App.zone=0; App.idx=0; App.updateFocus(); }
+                    if(d && Array.isArray(d)) { renderCats(d); App.zone=0; App.idx=0; App.updateFocus(); }
                 });
             },
             
@@ -489,7 +481,7 @@
 
                 var onData = function(d) { 
                     if (currentReq !== App.reqId) return; 
-                    if(d && d!=='ERR_NET') { 
+                    if(d && Array.isArray(d)) { 
                         var junk = ['adulto','xxx','sex','porn','+18','teste','off'];
                         if(App.cfg.filter) {
                             var res = []; for(var k=0; k<d.length; k++) { var nome = (d[k].name || d[k].title || "").toLowerCase(); var show = true; for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } } if(show) res.push(d[k]); }
@@ -498,21 +490,21 @@
                         App.categoryDataCache = App.fullData;
                         if(jumpFocus && App.fullData.length > 0) { App.zone = 2; App.idx = 0; }
                         App.renderList(); 
-                    } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; }
+                    } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = t.tot_pre + "0"; }
                 };
 
                 if(cid === 'fav') { 
                     this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams", function(d){ 
-                        if(d && d!=='ERR_NET') { 
-                            if (currentReq !== App.reqId) return;
+                        if (currentReq !== App.reqId) return;
+                        if(d && Array.isArray(d)) { 
                             var favs = d.filter(function(x){ var fId = x.stream_id || x.id; return FavManager.isFav(fId); }); 
                             App.fullData = favs; App.categoryDataCache = favs; if(jumpFocus && favs.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(); 
-                        } 
+                        } else { onData(null); }
                     }); 
                 } 
                 else { 
                     this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams&category_id="+cid, function(d){
-                        if(d && d!=='ERR_NET') { onData(d); } else { onData(null); }
+                        onData(d);
                     }); 
                 }
             },
@@ -583,7 +575,7 @@
                     listEl.innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 2vh;"><i class="fas fa-circle-notch fa-spin" style="font-size: 5vh; margin-bottom: 15px;"></i><br><br>BUSCANDO...</div>';
                     App.req(App.creds.h+"/player_api.php?username="+App.creds.u+"&password="+App.creds.p+"&action=get_live_streams", function(d) { 
                         if (currentReq !== App.reqId) return;
-                        if(d && d !== 'ERR_NET') { 
+                        if(d && Array.isArray(d)) { 
                             var res = []; var maxResults = 100; var junk = ['adulto','xxx','sex','porn','+18'];
                             for(var i=0; i<d.length; i++) { 
                                 var nome = d[i].name || d[i].title || ""; var show = true;
@@ -632,16 +624,26 @@
                 
                 if(el) { 
                     el.classList.add('focused'); 
-                    if(el.tagName==='INPUT') { try { el.focus({preventScroll:true}); } catch(e) { el.focus(); } } 
-                    else { var inps = document.querySelectorAll('input'); for(var i=0; i<inps.length; i++) { inps[i].blur(); } if (document.activeElement && document.activeElement !== document.body) { try { document.activeElement.blur(); } catch(e) {} } } 
                     
+                    // Suporte seguro para focar em inputs em TVs antigas
+                    if(el.tagName==='INPUT') { 
+                        try { el.focus({preventScroll:true}); } catch(e) { try { el.focus(); } catch(e2){} } 
+                    } 
+                    else { 
+                        var inps = document.querySelectorAll('input'); for(var i=0; i<inps.length; i++) { try { inps[i].blur(); } catch(e){} } 
+                        if (document.activeElement && document.activeElement !== document.body) { try { document.activeElement.blur(); } catch(e) {} } 
+                    } 
+                    
+                    // Rolagem CLÁSSICA (Sem smooth scroll) para não travar navegadores baseados em Webkit antigo (Philco)
                     if(el.tagName!=='INPUT') {
                         var parentContainer = el.parentElement;
                         while(parentContainer && parentContainer !== document.body) {
                             var style = window.getComputedStyle(parentContainer);
                             if(style.overflowY === 'auto' || style.overflowY === 'scroll') {
-                                try { parentContainer.scrollTo({ top: el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2), behavior: 'smooth' }); } 
-                                catch(e) { parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2); } break;
+                                try { 
+                                    parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2); 
+                                } catch(e) {} 
+                                break;
                             }
                             parentContainer = parentContainer.parentElement;
                         }
@@ -677,7 +679,7 @@
         };
 
         document.addEventListener('keydown', function(e) {
-            var k = e.keyCode;
+            var k = e.keyCode || e.which;
             
             var isLeft = (k===37); var isUp = (k===38); var isRight = (k===39); var isDown = (k===40);
             var isEnter = (k===13 || k===295); 
