@@ -20,6 +20,7 @@
             --font-xs: 1.8vh; --font-sm: 2.2vh; --font-md: 3vh; --font-lg: 5vh;
         }
 
+        /* Otimização: Renderização mais simples para CPUs fracas */
         * { 
             margin: 0; padding: 0; box-sizing: border-box; outline: none; 
             -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;           
@@ -29,8 +30,7 @@
             background: #000000; color: #ffffff; font-family: 'Montserrat', sans-serif;
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; 
             overflow: hidden !important; overscroll-behavior: none; touch-action: none;
-            transform: translate3d(0,0,0); -webkit-transform: translate3d(0,0,0);
-            backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            /* Transform removido no body para poupar GPU da TV */
         }
 
         .hide { display: none !important; }
@@ -42,21 +42,19 @@
             background: #000; z-index: 99999; flex-direction: column; align-items: center; justify-content: center;
             color: var(--main-color); text-align: center; font-weight: 900; font-size: 3vh;
         }
-        .phone-icon { font-size: 10vh; margin-bottom: 20px; animation: rotatePhone 2s infinite ease-in-out; }
-        @keyframes rotatePhone { 0%, 100% { transform: rotate(0deg); opacity: 0; } 25%, 50% { transform: rotate(-90deg); opacity: 1; } 75% { transform: rotate(-90deg); opacity: 0; } }
         @media screen and (max-width: 768px) and (orientation: portrait) { #orientation-overlay { display: flex !important; } }
 
         button, .cat-item, .item, .key, .toggle-btn { cursor: pointer; }
         
+        /* OTIMIZAÇÃO DE FOCO: Removido scale() e transitions. Troca de cor instantânea salva processamento. */
         .focused { 
             border: 3px solid #fff !important; background: var(--main-color) !important; color: #000 !important; 
-            z-index: 50; box-shadow: none !important; transform: scale(1.02) translateZ(0) !important;
-            transition: transform 0.1s ease-out, background 0.1s;
+            z-index: 50; box-shadow: none !important; 
         }
         .focused i, .focused span, .focused div { color: #000 !important; }
         
-        #vid-box.focused { border: 4px solid var(--main-color) !important; background: transparent !important; transform: none !important; }
-        #vid-box.fs, #vid-box.fs.focused { border: none !important; width: 100% !important; height: 100% !important; z-index: 9999 !important; position: fixed !important; top: 0 !important; left: 0 !important; background: #000 !important; transform: none !important; }
+        #vid-box.focused { border: 4px solid var(--main-color) !important; background: transparent !important; }
+        #vid-box.fs, #vid-box.fs.focused { border: none !important; width: 100% !important; height: 100% !important; z-index: 9999 !important; position: fixed !important; top: 0 !important; left: 0 !important; background: #000 !important; }
 
         .login-box { width: 450px; max-width: 90%; padding: 40px; background: #0a0a0a; border: 2px solid var(--main-color); border-radius: 12px; text-align: center; }
         .logo-txt { font-size: 4.5vh; font-weight: 900; margin-bottom: 2.5vh; }
@@ -76,7 +74,7 @@
 
         .cat-head { padding: 15px; background: #15151a; color: var(--main-color); border-bottom: 2px solid #222; text-align: center; font-size: var(--font-md); font-weight: 900; flex-shrink: 0; }
         
-        .cat-list, .item-list { flex: 1; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; will-change: transform; transform: translateZ(0); touch-action: pan-y; }
+        .cat-list, .item-list { flex: 1; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
         .cat-item, .item { padding: 14px 20px; border-radius: 6px; margin: 6px 12px; color: #888; font-size: var(--font-sm); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; }
         .cat-item.active { background: #1a1a1a; color: #fff; border-left: 4px solid var(--main-color); }
@@ -90,34 +88,35 @@
 
         .vid-box { 
             width: 100%; height: 50vh; background: #000; position: relative; border-bottom: 2px solid #222; overflow: hidden; flex-shrink: 0;
-            touch-action: manipulation; transform: translateZ(0); 
         }
         
-        #player-container { width:100%; height:100%; background:#000; transform: translateZ(0); }
-        video { width: 100%; height: 100%; object-fit: fill; background: #000; z-index: 1; transform: translateZ(0); }
+        #player-container { width:100%; height:100%; background:#000; }
+        video { width: 100%; height: 100%; object-fit: fill; background: #000; z-index: 1; }
 
         .buffer-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .buffer-spinner { font-size: 8vh; color: var(--main-color); text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        .buffer-spinner { font-size: 8vh; color: var(--main-color); }
 
         .meta { padding: 25px; flex: 1; height: 100%; overflow-y: auto; background: #0a0a0c; display: flex; flex-direction: column; }
         
         .meta-title { font-size: var(--font-lg); color: var(--main-color); font-weight: 900; margin-bottom: 1vh; }
         .meta-desc { font-size: var(--font-sm); color: #999; margin-bottom: 1vh; }
 
-        /* Nova área de informações do usuário baseada na UI solicitada (Muda pro fundo) */
+        /* ATUALIZAÇÃO 1: Mais espaço e respiro na caixa de informações */
         .user-info-box {
-            display: flex; justify-content: space-around; align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             background: #111; border: 1px solid #222; border-radius: 1vh;
-            padding: 1.5vh; margin-top: auto; margin-bottom: 2vh;
+            padding: 2.5vh 4vw; margin-top: auto; margin-bottom: 3vh;
         }
-        .info-col { display: flex; flex-direction: column; align-items: center; gap: 0.8vh; }
+        .info-col { display: flex; flex-direction: column; align-items: center; gap: 1.2vh; }
         .info-label { color: #888; font-size: var(--font-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .info-val { color: #fff; font-size: var(--font-sm); font-weight: 900; display: flex; align-items: center; gap: 0.5vw;}
+        .info-val { color: #fff; font-size: var(--font-sm); font-weight: 900; display: flex; align-items: center; gap: 0.8vw;}
         .info-val i { color: var(--main-color); }
 
         .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid #1a1a1a; flex-shrink: 0; }
         .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 800; background: #151515; border: 1px solid #333; padding: 1.5vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
-        .dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
+        
+        /* OTIMIZAÇÃO 2: Removido box-shadow (sombras) das bolinhas para evitar lag na TV Philco */
+        .dot { width: 1.5vh; height: 1.5vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
 
         #loader { background: #000; z-index: 20000; flex-direction: column; color: var(--main-color); font-weight: 900; font-size: var(--font-lg); }
         #pause-layer { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 9000; align-items: center; justify-content: center; pointer-events: none; }
@@ -185,7 +184,7 @@
         <div class="col-play">
             <div id="vid-box" class="vid-box focusable" onclick="App.handleVideoTap(event)">
                 <div id="player-container">
-                    <video id="player" playsinline webkit-playsinline></video>
+                    <video id="player" preload="none" playsinline webkit-playsinline></video>
                 </div>
                 
                 <div id="smart-buffer" class="buffer-overlay">
@@ -214,10 +213,10 @@
                 </div>
 
                 <div class="keys">
-                    <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000; box-shadow: 0 0 10px #FF0000;"></div> TELA CHEIA</div>
-                    <div class="key" id="key-top"><div class="dot" style="background-color:#00C851; box-shadow: 0 0 10px #00C851;"></div> TOPO</div>
-                    <div class="key" id="key-search"><div class="dot" style="background-color:#ffbb33; box-shadow: 0 0 10px #ffbb33;"></div> BUSCAR</div>
-                    <div class="key" id="key-menu" onclick="App.openSettings()"><div class="dot" style="background-color:#33b5e5; box-shadow: 0 0 10px #33b5e5;"></div> CONFIG.</div>
+                    <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000;"></div> TELA CHEIA</div>
+                    <div class="key" id="key-top"><div class="dot" style="background-color:#00C851;"></div> TOPO</div>
+                    <div class="key" id="key-search"><div class="dot" style="background-color:#ffbb33;"></div> BUSCAR</div>
+                    <div class="key" id="key-menu" onclick="App.openSettings()"><div class="dot" style="background-color:#33b5e5;"></div> CONFIG.</div>
                 </div>
             </div>
         </div>
@@ -228,9 +227,7 @@
             if (!vidElement) return;
             try { 
                 var p = vidElement.play(); 
-                if (p !== undefined && typeof p.catch === 'function') { 
-                    p.catch(function(e) {}); 
-                } 
+                if (p !== undefined && typeof p.catch === 'function') { p.catch(function(e) {}); } 
             } catch (e) {}
         }
 
@@ -349,7 +346,7 @@
             categoryDataCache: null, lastScreenSwitch: 0, lastTap: 0, tapTimer: null, currentReqId: 0,
 
             pad: function(n) { return (n < 10) ? ("0" + n) : n; },
-            smartSort: function(a, b) { var nameA = (a.name || a.title || "").toLowerCase(); var nameB = (b.name || b.title || "").toLowerCase(); try { return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }); } catch (e) { return nameA < nameB ? -1 : 1; } },
+            smartSort: function(a, b) { var nameA = (a.name || "").toLowerCase(); var nameB = (b.name || "").toLowerCase(); try { return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }); } catch (e) { return nameA < nameB ? -1 : 1; } },
 
             init: function() {
                 FavManager.init(); 
@@ -391,11 +388,9 @@
                         var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : "Ilimitado"; var conn = (info.active_cons || 0) + " / " + (info.max_connections || 1);
                         var created = info.created_at ? new Date(info.created_at*1000).toLocaleDateString('pt-BR') : "Desconhecido";
                         
-                        // Set UI details
                         document.getElementById('play-user').innerText = info.username || u; document.getElementById('play-exp').innerText = exp; document.getElementById('play-conn').innerText = conn;
                         document.getElementById('set-user').innerText = info.username || u; document.getElementById('set-exp').innerText = exp; document.getElementById('set-conn').innerText = (info.max_connections || 1); document.getElementById('set-created').innerText = created;
                         
-                        // Direto para Live TV sem Dashboard
                         App.openModeLive(true);
                     } else { App.setScr(0); document.getElementById('msg-login').innerText = "Login Inválido"; localStorage.clear(); }
                 });
@@ -466,7 +461,7 @@
             loadContent: function(catIdx, jumpFocus) {
                 if (catIdx === -1) return; 
                 this.lastCatIdx = catIdx; 
-                this.currentReqId = new Date().getTime(); // Prevent ghost requests
+                this.currentReqId = new Date().getTime(); 
                 var reqId = this.currentReqId;
                 
                 var el = document.getElementById('c'+catIdx); if(!el) return;
@@ -476,8 +471,8 @@
                 document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 30px;"><i class="fas fa-circle-notch fa-spin"></i></div>';
 
                 var onData = function(d) { 
-                    if(reqId !== App.currentReqId) return; // Ghost Fix
-                    document.getElementById('item-list').innerHTML = ''; // Limpeza total do DOM DOM
+                    if(reqId !== App.currentReqId) return;
+                    document.getElementById('item-list').innerHTML = ''; 
                     if(d && d!=='ERR_NET' && Array.isArray(d)) { 
                         var junk = ['adulto','xxx','sex','porn','+18','teste','off'];
                         App.fullData = []; App.categoryDataCache = null;
@@ -512,7 +507,7 @@
                 var d = this.fullData; var max = d.length; var listEl = document.getElementById('item-list'); 
                 var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = "TOTAL: " + max;
                 
-                listEl.innerHTML = ''; // Garante remoção de fantasmas
+                listEl.innerHTML = ''; 
                 if(max===0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Vazio</div>'; return; }
 
                 var h = [];
@@ -565,7 +560,7 @@
                 var rawT = document.getElementById('search').value; 
                 var listEl = document.getElementById('item-list');
                 
-                App.currentReqId = new Date().getTime(); // Control ghost results
+                App.currentReqId = new Date().getTime(); 
                 var reqId = App.currentReqId;
                 listEl.innerHTML = ''; 
 
@@ -579,7 +574,7 @@
                 if (isGlobal) {
                     listEl.innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 2vh;"><i class="fas fa-circle-notch fa-spin" style="font-size: 5vh; margin-bottom: 15px;"></i><br><br>BUSCANDO...</div>';
                     App.req(App.creds.h+"/player_api.php?username="+App.creds.u+"&password="+App.creds.p+"&action=get_live_streams", function(d) { 
-                        if (reqId !== App.currentReqId) return; // Cancel se nova request
+                        if (reqId !== App.currentReqId) return; 
                         if(d && d !== 'ERR_NET' && Array.isArray(d)) { 
                             var res = []; var maxResults = 250; var junk = ['adulto','xxx','sex','porn','+18'];
                             for(var i=0; i<d.length; i++) { 
@@ -626,7 +621,10 @@
             },
             
             updateFocus: function() {
-                var focusedItems = document.querySelectorAll('.focused'); for(var k=0; k<focusedItems.length; k++) { focusedItems[k].classList.remove('focused'); }
+                // OTIMIZAÇÃO: Busca única no DOM em vez de 'querySelectorAll'
+                var prevFocused = document.querySelector('.focused'); 
+                if (prevFocused) prevFocused.classList.remove('focused');
+                
                 var el; if(this.scr===0) el=document.getElementById('i'+this.idx); if(this.scr===3) el=document.getElementById('s'+this.idx);
                 if(this.scr===2) { if(this.zone===0) el=document.getElementById('c'+this.idx); if(this.zone===1) el=document.getElementById('search'); if(this.zone===2) el=document.getElementById('row-'+this.idx); if(this.zone===3) el=document.getElementById('vid-box'); }
                 
@@ -637,11 +635,12 @@
                     
                     if(el.tagName!=='INPUT') {
                         var parentContainer = el.parentElement;
+                        // OTIMIZAÇÃO: Scroll manual direto sem 'behavior: smooth' que engasga CPUs lentas
                         while(parentContainer && parentContainer !== document.body) {
                             var style = window.getComputedStyle(parentContainer);
                             if(style.overflowY === 'auto' || style.overflowY === 'scroll') {
-                                try { parentContainer.scrollTo({ top: el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2), behavior: 'smooth' }); } 
-                                catch(e) { parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2); } break;
+                                parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2);
+                                break;
                             }
                             parentContainer = parentContainer.parentElement;
                         }
@@ -684,10 +683,21 @@
 
         document.addEventListener('keydown', function(e) {
             var k = e.keyCode;
-            var isLeft = (k===37); var isUp = (k===38); var isRight = (k===39); var isDown = (k===40);
-            var isEnter = (k===13 || k===295); var isBack = (k===8 || k===27 || k===461 || k===10009 || k===88); 
-            var isRed = (k===403 || k===82); var isGreen = (k===404 || k===71); var isYellow = (k===405 || k===89); var isBlue = (k===406 || k===66 || k===275); 
-            var isChUp = (k===427 || k===33); var isChDown = (k===428 || k===34); 
+            
+            var isLeft = (k===37); 
+            var isUp = (k===38); 
+            var isRight = (k===39); 
+            var isDown = (k===40);
+            
+            var isEnter = (k===13 || k===295 || k===23 || k===66); 
+            var isBack = (k===8 || k===27 || k===4 || k===461 || k===10009 || k===88 || k===4061 || k===10007); 
+
+            var isRed = (k===403 || k===82); 
+            var isGreen = (k===404 || k===71); 
+            var isYellow = (k===405 || k===89); 
+            var isBlue = (k===406 || k===275); 
+            var isChUp = (k===427 || k===33); 
+            var isChDown = (k===428 || k===34); 
 
             if(App.scr === 2 && document.activeElement && document.activeElement.id === 'search') {
                 if(isEnter) { App.doSearch(true); return; }
