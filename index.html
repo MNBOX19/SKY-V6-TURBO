@@ -208,8 +208,7 @@
             <div class="dash-logo"><span style="color:#fff">IPTV</span>&nbsp;<span class="theme-text">PHILCO MAX</span></div>
             <div class="dash-clock"><div id="clock-time" class="clock-time">--:--</div><div id="clock-date" class="clock-date">--/--/----</div></div>
             <div class="top-actions">
-                <div id="m3" class="power-btn focusable" onclick="App.openSettings()"><i class="fas fa-cog"></i></div>
-                <div id="m4" class="power-btn focusable" onclick="App.logout()"><i class="fas fa-power-off"></i></div>
+                <div id="m3" class="power-btn focusable" onclick="App.logout()"><i class="fas fa-power-off"></i></div>
             </div>
         </div>
         <div class="dash-grid">
@@ -289,7 +288,7 @@
         var FavManager = {
             key: 'rc_favs_smart', list: [],
             init: function() { var s = localStorage.getItem(this.key); this.list = s ? JSON.parse(s) : []; },
-            toggle: function(id) { var idx = this.list.indexOf(id); if(idx > -1) this.list.splice(idx, 1); else this.list.push(id); localStorage.setItem(this.key, JSON.stringify(this.list)); if (App && App.renderList) App.renderList(); },
+            toggle: function(id) { var idx = this.list.indexOf(id); if(idx > -1) this.list.splice(idx, 1); else this.list.push(id); localStorage.setItem(this.key, JSON.stringify(this.list)); if (App && App.renderList) App.renderList(false); },
             isFav: function(id) { return this.list.indexOf(id) > -1; }
         };
 
@@ -401,7 +400,7 @@
             validCategories: null, scr: 0, zone: 0, idx: 0, lastCatIdx: -1, creds: {}, fullData: [], playingId: null,
             cfg: { filter: false, format: 'ts_native', lang: 'pt' }, userInfo: null, lastEnter: 0,
             categoryDataCache: null, showingEpisodes: false, lastScreenSwitch: 0,
-            seriesDataCache: null, lastSeriesIdx: 0, lastTap: 0, tapTimer: null, pageSize: 50, mobileRenderedPages: 1,
+            seriesDataCache: null, lastSeriesIdx: 0, lastTap: 0, tapTimer: null, renderLimit: 150,
 
             pad: function(n) { return (n < 10) ? ("0" + n) : n; },
             smartSort: function(a, b) { var nameA = (a.name || a.title || "").toLowerCase(); var nameB = (b.name || b.title || "").toLowerCase(); try { return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }); } catch (e) { return nameA < nameB ? -1 : 1; } },
@@ -422,13 +421,6 @@
 
             init: function() {
                 FavManager.init(); 
-                
-                document.getElementById('item-list').addEventListener('scroll', function() { 
-                    var el = this; 
-                    if(el.scrollTop + el.clientHeight >= el.scrollHeight - 50) { 
-                        App.loadMoreMobile(); 
-                    } 
-                });
 
                 if(localStorage.getItem('rc_cfg_filter')) this.cfg.filter = (localStorage.getItem('rc_cfg_filter') === 'true');
                 var savedFmt = localStorage.getItem('rc_cfg_format'); this.cfg.format = (savedFmt === 'm3u8_native' || savedFmt === 'ts_native') ? savedFmt : 'ts_native'; this.cfg.lang = 'pt'; 
@@ -593,7 +585,7 @@
                         } else { App.fullData = d; }
                         App.categoryDataCache = App.fullData;
                         if(jumpFocus && App.fullData.length > 0) { App.zone = 2; App.idx = 0; }
-                        App.renderList(); 
+                        App.renderList(false); 
                     } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; }
                 };
 
@@ -602,7 +594,7 @@
                         if(d && d!=='ERR_NET') { 
                             var favs = d.filter(function(x){ var fId = x.stream_id || x.series_id || x.id; return FavManager.isFav(fId); }); 
                             App.fullData = null; App.categoryDataCache = null;
-                            App.fullData = favs; App.categoryDataCache = favs; if(jumpFocus && favs.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(); 
+                            App.fullData = favs; App.categoryDataCache = favs; if(jumpFocus && favs.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(false); 
                         } 
                     }); 
                 } 
@@ -613,44 +605,33 @@
                 }
             },
 
-            renderList: function() {
+            renderList: function(append) {
                 var d = this.fullData; var max = d.length; var t = App.i18n[App.cfg.lang]; var listEl = document.getElementById('item-list'); 
                 var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = t.tot_pre + max;
                 if(max===0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; return; }
 
-                var currentListIdx = (this.zone === 2) ? this.idx : 0;
-                var currentPage = Math.floor(currentListIdx / this.pageSize); 
-                var start = currentPage * this.pageSize; 
-                var end = Math.min(start + this.pageSize, max);
+                if(!append) { 
+                    this.renderLimit = 150; 
+                    listEl.innerHTML = ''; 
+                }
                 
+                var start = append ? this.renderLimit - 150 : 0;
+                var end = Math.min(max, this.renderLimit);
                 var h = [];
+                
                 for(var i = start; i < end; i++) {
                     var n = d[i].name || d[i].title; var id = d[i].stream_id || d[i].series_id || d[i].id; var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
                     var playingClass = (App.playingId == id) ? ' playing' : ''; 
                     h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
                 }
-                listEl.innerHTML = h.join(''); 
                 
-                this.mobileRenderedPages = currentPage + 1;
-                this.updateFocus();
-            },
-
-            loadMoreMobile: function() {
-                var max = this.fullData.length;
-                var start = this.mobileRenderedPages * this.pageSize;
-                if(start >= max) return; 
-                
-                var end = Math.min(start + this.pageSize, max);
-                var h = [];
-                for(var i = start; i < end; i++) {
-                    var n = this.fullData[i].name || this.fullData[i].title;
-                    var id = this.fullData[i].stream_id || this.fullData[i].series_id || this.fullData[i].id;
-                    var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
-                    var playingClass = (App.playingId == id) ? ' playing' : '';
-                    h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
+                if(append) {
+                    var temp = document.createElement('div'); temp.innerHTML = h.join('');
+                    while(temp.firstChild) { listEl.appendChild(temp.firstChild); }
+                } else {
+                    listEl.innerHTML = h.join('');
                 }
-                document.getElementById('item-list').insertAdjacentHTML('beforeend', h.join(''));
-                this.mobileRenderedPages++;
+                if(!append) this.updateFocus();
             },
 
             itemClick: function(i, isTrusted) { 
@@ -681,7 +662,7 @@
                         eps.sort(function(a, b) { if (a.season_num !== b.season_num) { return a.season_num - b.season_num; } return a.episode_real_num - b.episode_real_num; });
                         
                         App.fullData = null; 
-                        App.fullData = eps; App.zone = 2; App.idx = 0; App.renderList(); 
+                        App.fullData = eps; App.zone = 2; App.idx = 0; App.renderList(false); 
                     } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.no_ep+'</div>'; }
                 };
 
@@ -722,7 +703,9 @@
                 for(var i=0; i<this.fullData.length; i++) { 
                     var id = this.fullData[i].stream_id || this.fullData[i].series_id || this.fullData[i].id; 
                     if(id == this.playingId) { 
-                        this.idx = i; this.renderList(); this.updateFocus(); return; 
+                        this.idx = i; 
+                        if (this.idx >= this.renderLimit) { this.renderLimit = this.idx + 150; this.renderList(false); }
+                        this.updateFocus(); return; 
                     } 
                 } 
             },
@@ -732,7 +715,7 @@
             doSearch: function(isGlobal) {
                 App.showingEpisodes = false; var rawT = document.getElementById('search').value; 
                 if(rawT.length === 0) { 
-                    if(App.lastCatIdx > -1) { App.loadContent(App.lastCatIdx); } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>'; App.fullData = []; App.renderList(); } return; 
+                    if(App.lastCatIdx > -1) { App.loadContent(App.lastCatIdx); } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>'; App.fullData = []; App.renderList(false); } return; 
                 }
                 if(rawT.length < 2) return; var tStr = App.removeAccents(rawT); var listEl = document.getElementById('item-list');
                 
@@ -748,7 +731,7 @@
                                 if(show && App.removeAccents(nome).indexOf(tStr) > -1) { res.push(d[i]); if(res.length >= maxResults) break; } 
                             }
                             d = null; 
-                            if (res.length > 0) { res.sort(App.smartSort); App.fullData = res; App.zone = 2; App.idx = 0; App.renderList(); } 
+                            if (res.length > 0) { res.sort(App.smartSort); App.fullData = res; App.zone = 2; App.idx = 0; App.renderList(false); } 
                             else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum resultado encontrado no servidor global.</div>'; var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = App.i18n[App.cfg.lang].tot_pre + "0"; }
                         } else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Erro na conexão com o servidor.</div>'; }
                     });
@@ -758,7 +741,7 @@
                         var baseData = App.categoryDataCache || App.fullData;
                         if (!baseData || baseData.length === 0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+App.i18n[App.cfg.lang].empty+'</div>'; return; }
                         var res = []; for(var i=0; i<baseData.length; i++) { var nome = baseData[i].name || baseData[i].title || ""; if(App.removeAccents(nome).indexOf(tStr) > -1) { res.push(baseData[i]); } }
-                        if (res.length > 0) { App.fullData = res; App.renderList(); } else { listEl.innerHTML = '<div style="padding:20px; text-align:center; font-size:1.8vh; color:#888;">Não encontrado nesta categoria.<br><br><b style="color:var(--main-color);">APERTE ENTER PARA BUSCA GLOBAL</b></div>'; }
+                        if (res.length > 0) { App.fullData = res; App.renderList(false); } else { listEl.innerHTML = '<div style="padding:20px; text-align:center; font-size:1.8vh; color:#888;">Não encontrado nesta categoria.<br><br><b style="color:var(--main-color);">APERTE ENTER PARA BUSCA GLOBAL</b></div>'; }
                     }, 50);
                 }
             },
@@ -787,7 +770,7 @@
                 if(document.getElementById('vid-box').classList.contains('fs')) { this.exitFull(); return; }
                 if(this.zone===3) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); return; }
                 if(this.zone===2) { 
-                    if(App.currentMode === 'series' && App.fullData.length > 0 && App.fullData[0].is_episode) { App.fullData = App.seriesDataCache; App.idx = App.lastSeriesIdx; App.showingEpisodes = false; App.renderList(); App.updateFocus(); return; } 
+                    if(App.currentMode === 'series' && App.fullData.length > 0 && App.fullData[0].is_episode) { App.fullData = App.seriesDataCache; App.idx = App.lastSeriesIdx; App.showingEpisodes = false; App.renderList(false); App.updateFocus(); return; } 
                     this.zone=0; this.idx=(this.lastCatIdx > -1 ? this.lastCatIdx : 0); this.updateFocus(); return; 
                 }
                 if(this.zone===1) { this.zone=2; this.idx=0; this.updateFocus(); return; }
@@ -821,27 +804,25 @@
             move: function(d) {
                 var s = this.scr;
                 if(s===0) { if(d===1 && this.idx < 3) this.idx++; if(d===0 && this.idx > 0) this.idx--; }
-                else if(s===1) { if(this.idx === 0) { if(d===3) this.idx=1; else if(d===0) this.idx=3; } else if(this.idx === 1) { if(d===3) this.idx=2; else if(d===2) this.idx=0; else if(d===0) this.idx=3; } else if(this.idx === 2) { if(d===2) this.idx=1; else if(d===0) this.idx=3; } else if(this.idx === 3) { if(d===3) this.idx=4; else if(d===1) this.idx=0; } else if(this.idx === 4) { if(d===2) this.idx=3; else if(d===1) this.idx=2; } }
+                else if(s===1) { if(this.idx === 0) { if(d===3) this.idx=1; else if(d===0) this.idx=3; } else if(this.idx === 1) { if(d===3) this.idx=2; else if(d===2) this.idx=0; else if(d===0) this.idx=3; } else if(this.idx === 2) { if(d===2) this.idx=1; else if(d===0) this.idx=3; } else if(this.idx === 3) { if(d===1) this.idx=0; } }
                 else if(s===3) { if(this.idx === 0) { if(d===1) this.idx = 1; } else if(this.idx === 1) { if(d===1) this.idx = 2; else if(d===0) this.idx = 0; } else if(this.idx === 2) { if(d===3) this.idx = 3; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; } else if(this.idx === 3) { if(d===2) this.idx = 2; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; } else if(this.idx === 4) { if(d===0) this.idx = 2; else if(d===3) this.idx = 5; } else if(this.idx === 5) { if(d===2) this.idx = 4; else if(d===0) this.idx = 3; } }
                 else if(s===2) {
                     if(this.zone===3) { if(d===2) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); } return; }
-                    if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; App.renderList(); } }
+                    if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; App.renderList(false); } }
                     else if(this.zone===2) { 
                         var dataLen = App.fullData.length;
                         if(d===1) { 
                             if(typeof this.idx === 'number' && this.idx < dataLen - 1) { 
-                                var oldPage = Math.floor(this.idx / this.pageSize); 
                                 this.idx++; 
-                                var newPage = Math.floor(this.idx / this.pageSize); 
-                                if (oldPage !== newPage) this.renderList(); 
+                                if(this.idx >= this.renderLimit - 10 && this.renderLimit < dataLen) {
+                                    this.renderLimit += 150;
+                                    this.renderList(true); 
+                                }
                             } 
                         }
                         else if(d===0) { 
                             if(typeof this.idx === 'number' && this.idx > 0) { 
-                                var oldPage = Math.floor(this.idx / this.pageSize); 
                                 this.idx--; 
-                                var newPage = Math.floor(this.idx / this.pageSize); 
-                                if (oldPage !== newPage) this.renderList(); 
                             } else if(this.idx === 0) { 
                                 this.zone = 1; 
                             } 
@@ -857,7 +838,7 @@
                 var now = new Date().getTime(); if(now - this.lastEnter < 400) return; this.lastEnter = now;
                 var currentScr = this.scr; 
                 if(currentScr===0) { if(this.idx === 3) this.login(false); else if(this.idx < 3) this.move(1); }
-                else if(currentScr===1) { if(this.idx === 4) this.logout(); else if(this.idx === 3) this.openSettings(); else if(this.idx === 0) this.openMode('live', true); else if(this.idx === 1) this.openMode('movie', true); else if(this.idx === 2) this.openMode('series', true); }
+                else if(currentScr===1) { if(this.idx === 3) this.logout(); else if(this.idx === 0) this.openMode('live', true); else if(this.idx === 1) this.openMode('movie', true); else if(this.idx === 2) this.openMode('series', true); }
                 else if(currentScr===3) { if(this.idx === 1) this.toggleLang(); else if(this.idx === 2) this.toggleCfg('filter'); else if(this.idx === 3) this.toggleFormat(); else if(this.idx === 4) this.closeSettings(); else if(this.idx === 5) this.logout(); }
                 else if(currentScr===2) { if(this.zone===0) this.catClick(this.idx, true); else if(this.zone===1) this.doSearch(true); else if(this.zone===2) { this.clickItem(); } else if(this.zone===3) this.toggleFull(); }
             }
@@ -915,7 +896,7 @@
             if(isRed) if(App.scr===2) App.toggleFull(); 
             if(isGreen) if(App.scr===2) { App.zone=0; App.idx=0; App.updateFocus(); } 
             if(isYellow) if(App.scr===2) { App.zone=1; App.updateFocus(); } 
-            if(isBlue) { e.preventDefault(); if(App.scr===2) App.openSettings(); else if(App.scr===1) App.setScr(2); } 
+            if(isBlue) { e.preventDefault(); if(App.scr===2) App.openSettings(); } 
         });
 
         window.addEventListener('beforeunload', function() { PlayerEngine.hardStop(); });
