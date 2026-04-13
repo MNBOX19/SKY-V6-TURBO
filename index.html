@@ -46,7 +46,7 @@
         @keyframes rotatePhone { 0%, 100% { transform: rotate(0deg); opacity: 0; } 25%, 50% { transform: rotate(-90deg); opacity: 1; } 75% { transform: rotate(-90deg); opacity: 0; } }
         @media screen and (max-width: 768px) and (orientation: portrait) { #orientation-overlay { display: flex !important; } }
 
-        button, .cat-item, .item, .power-btn, .key, .toggle-btn { cursor: pointer; }
+        button, .smart-card, .cat-item, .item, .power-btn, .key, .toggle-btn { cursor: pointer; }
         
         .focused { 
             border: 3px solid #fff !important; background: var(--main-color) !important; color: #000 !important; 
@@ -69,12 +69,6 @@
         .toggle-btn { flex: 1; padding: 1.5vh; background: #1a1a1a; border: 1px solid #333; color: #888; font-size: var(--font-sm); font-weight: 800; border-radius: 1vh; }
         .info-row { display: flex; justify-content: space-between; padding: 1vh 0; border-bottom: 1px solid #222; font-size: var(--font-sm); color: #ccc; }
         
-        @keyframes pulse-btn {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
-            50% { transform: scale(1.15); box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
-        }
-
         #content-layer { display: flex; width: 100%; height: 100%; background: #000; overflow: hidden; }
         .col-cat { width: 25%; background: #08080a; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; height: 100%; overflow: hidden; }
         .col-list { width: 35%; background: #101014; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; height: 100%; overflow: hidden; }
@@ -110,14 +104,20 @@
         .meta { padding: 25px; flex: 1; height: 100%; overflow-y: auto; background: #0a0a0c; display: flex; flex-direction: column; }
         .meta-title { font-size: var(--font-lg); color: var(--main-color); font-weight: 900; margin-bottom: 1vh; }
         .meta-desc { font-size: var(--font-sm); color: #999; margin-bottom: 1vh; }
-
-        .info-block { display: flex; justify-content: space-between; background: #111; border: 1px solid #222; border-radius: 1vh; padding: 2vh; margin-top: auto; margin-bottom: 2vh; text-align: center; }
-        .info-col { flex: 1; }
-        .info-label { font-size: var(--font-xs); color: #888; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5vh; }
-        .info-value { font-size: var(--font-sm); color: #fff; font-weight: 900; }
-        .info-value i { color: var(--main-color); margin-right: 0.5vw; }
         
-        .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; border-top: 2px solid #1a1a1a; padding-top: 2vh; flex-shrink: 0; }
+        /* NOVO PAINEL DE INFORMAÇÕES */
+        .user-info-panel {
+            display: flex; justify-content: space-around; align-items: center;
+            background: #0d0d0d; border: 1px solid #222; border-radius: 10px;
+            padding: 1.5vh 1vw; margin-bottom: 2.5vh;
+        }
+        .info-col { display: flex; flex-direction: column; align-items: center; gap: 0.5vh; }
+        .info-label { font-size: 1.6vh; color: #777; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .info-val { font-size: 2vh; color: #fff; font-weight: 900; display: flex; align-items: center; gap: 0.5vw; }
+        .info-val i { color: var(--main-color); }
+        .info-divider { border: 0; border-top: 1px solid #222; margin-bottom: 2.5vh; width: 100%; }
+
+        .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; flex-shrink: 0; }
         .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 700; background: #1a1a1a; border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
 
@@ -203,26 +203,30 @@
                 <div id="meta-title" class="meta-title"><span style="color:#fff">IPTV</span>&nbsp;OSCORP</div>
                 <div id="meta-desc" class="meta-desc"></div>
                 
-                <div class="info-block">
-                    <div class="info-col">
-                        <div class="info-label">USUÁRIO</div>
-                        <div class="info-value"><i class="fas fa-user"></i> <span id="osd-user">...</span></div>
+                <div style="margin-top: auto;">
+                    <div class="user-info-panel">
+                        <div class="info-col">
+                            <span class="info-label">USUÁRIO</span>
+                            <span class="info-val"><i class="fas fa-user"></i> <span id="osd-user">...</span></span>
+                        </div>
+                        <div class="info-col">
+                            <span class="info-label">VENCIMENTO</span>
+                            <span class="info-val"><i class="fas fa-calendar-alt"></i> <span id="osd-exp">...</span></span>
+                        </div>
+                        <div class="info-col">
+                            <span class="info-label">TELAS</span>
+                            <span class="info-val"><i class="fas fa-tv"></i> <span id="osd-conn">...</span></span>
+                        </div>
                     </div>
-                    <div class="info-col">
-                        <div class="info-label">VENCIMENTO</div>
-                        <div class="info-value"><i class="fas fa-calendar-alt"></i> <span id="osd-exp">...</span></div>
-                    </div>
-                    <div class="info-col">
-                        <div class="info-label">TELAS</div>
-                        <div class="info-value"><i class="fas fa-tv"></i> <span id="osd-conn">...</span></div>
-                    </div>
-                </div>
 
-                <div class="keys">
-                    <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000; box-shadow: 0 0 10px #FF0000;"></div> TELA CHEIA</div>
-                    <div class="key" id="key-top"><div class="dot" style="background-color:#00C851; box-shadow: 0 0 10px #00C851;"></div> TOPO</div>
-                    <div class="key" id="key-search"><div class="dot" style="background-color:#ffbb33; box-shadow: 0 0 10px #ffbb33;"></div> BUSCAR</div>
-                    <div class="key" id="key-menu"><div class="dot" style="background-color:#33b5e5; box-shadow: 0 0 10px #33b5e5;"></div> CONFIG.</div>
+                    <hr class="info-divider">
+
+                    <div class="keys">
+                        <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000; box-shadow: 0 0 10px #FF0000;"></div> TELA CHEIA</div>
+                        <div class="key" id="key-top"><div class="dot" style="background-color:#00C851; box-shadow: 0 0 10px #00C851;"></div> TOPO</div>
+                        <div class="key" id="key-search"><div class="dot" style="background-color:#ffbb33; box-shadow: 0 0 10px #ffbb33;"></div> BUSCAR</div>
+                        <div class="key" id="key-menu"><div class="dot" style="background-color:#33b5e5; box-shadow: 0 0 10px #33b5e5;"></div> CONFIG.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -266,7 +270,6 @@
                 this.video.onerror = function() { PlayerEngine.handleError(false); };
                 this.video.onabort = function() { PlayerEngine.handleError(false); };
                 this.video.onstalled = function() { PlayerEngine.showBuffer(); };
-                
                 this.video.onended = function() { PlayerEngine.handleError(false); };
 
                 this.video.addEventListener('playing', function() { PlayerEngine.onPlaySuccess(); });
@@ -325,10 +328,13 @@
             stopMonitor: function() { if(this.monitorTimer) clearInterval(this.monitorTimer); },
             
             handleError: function(isStall) {
-                if (this.retryCount < this.maxRetries) {
+                var limit = this.maxRetries; 
+                
+                if (this.retryCount < limit) {
                     this.retryCount++;
                     this.showBuffer();
                     this.resetDOM();
+                    
                     var delay = Math.min(1000 * Math.pow(1.5, this.retryCount), 5000);
                     setTimeout(function() { 
                         if(PlayerEngine.video && PlayerEngine.url) {
@@ -351,16 +357,16 @@
 
         var App = {
             validCategories: null, scr: 0, zone: 0, idx: 0, lastCatIdx: -1, creds: {}, fullData: [], playingId: null,
-            cfg: { filter: false, format: 'ts_native' }, userInfo: null, lastEnter: 0, categoryDataCache: null, 
-            lastScreenSwitch: 0, lastTap: 0, tapTimer: null, reqId: 0, 
+            cfg: { filter: false, format: 'ts_native', lang: 'pt' }, userInfo: null, lastEnter: 0,
+            categoryDataCache: null, lastScreenSwitch: 0, lastTap: 0, tapTimer: null, pageSize: 50, mobileRenderedPages: 1, currentMode: 'live',
 
             pad: function(n) { return (n < 10) ? ("0" + n) : n; },
             smartSort: function(a, b) { var nameA = (a.name || a.title || "").toLowerCase(); var nameB = (b.name || b.title || "").toLowerCase(); try { return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }); } catch (e) { return nameA < nameB ? -1 : 1; } },
 
-            i18n: { ph_dns: 'URL DNS', ph_user: 'USUÁRIO', ph_pass: 'SENHA', btn_login: 'CONECTAR', load_init: 'INICIANDO...', load_auth: 'AUTENTICANDO...', load_net: 'REDE...', err_net: 'Falha Conexão', err_auth: 'Login Inválido', set_title: 'MINHA CONTA', set_u: 'USUÁRIO:', set_e: 'VENCE:', set_c: 'TELAS:', set_d: 'CRIADO:', set_opt: 'OPÇÕES', set_filter: 'XXX:', set_format: 'FMT:', set_back: 'VOLTAR', yes: 'SIM', no: 'NÃO', fmt_def: 'PADRÃO', dash_live: 'TV AO VIVO', lbl_exp: 'VENCIMENTO', lbl_conn: 'TELAS', cat_title: 'MENU', cat_fav: '⭐ FAVORITOS', search_ph: 'BUSCAR...', empty: 'Vazio', loading: 'CARREGANDO...', osd_play: '▶ TOCA', osd_pause: '⏸ PAUSA', osd_lost: 'SEM SINAL', tot_chan: 'CANAIS', tot_pre: 'TOTAL: ', unlimited: 'Ilimitado', unknown: 'Desconhecido', btn_out: 'SAIR / DESLOGAR' },
+            i18n: { 'pt': { ph_dns: 'URL DNS', ph_user: 'USUÁRIO', ph_pass: 'SENHA', btn_login: 'CONECTAR', load_init: 'INICIANDO...', load_auth: 'AUTENTICANDO...', load_net: 'REDE...', err_net: 'Falha Conexão', err_auth: 'Login Inválido', set_title: 'MINHA CONTA', set_u: 'USUÁRIO:', set_e: 'VENCE:', set_c: 'TELAS:', set_d: 'CRIADO:', set_opt: 'OPÇÕES', set_filter: 'XXX:', set_format: 'FMT:', set_back: 'VOLTAR', yes: 'SIM', no: 'NÃO', fmt_def: 'PADRÃO', lbl_exp: 'VENCIMENTO', lbl_conn: 'TELAS', cat_title: 'MENU', cat_fav: '⭐ FAVORITOS', search_ph: 'BUSCAR...', empty: 'Vazio', loading: 'CARREGANDO...', tot_chan: 'CANAIS', tot_pre: 'TOTAL: ', unlimited: 'Ilimitado', unknown: 'Desconhecido', btn_out: 'SAIR / DESLOGAR' } },
 
             applyLang: function() {
-                var t = this.i18n;
+                var t = this.i18n[this.cfg.lang] || this.i18n['pt'];
                 document.getElementById('i0').placeholder = t.ph_dns; document.getElementById('i1').placeholder = t.ph_user; document.getElementById('i2').placeholder = t.ph_pass; document.getElementById('i3').innerText = t.btn_login;
                 document.getElementById('set-title-txt').innerHTML = '<i class="fas fa-user-shield" style="margin-right:10px; color: var(--main-color);"></i>' + t.set_title;
                 document.getElementById('lbl-set-u').innerText = t.set_u; document.getElementById('lbl-set-e').innerText = t.set_e; document.getElementById('lbl-set-c').innerText = t.set_c; document.getElementById('lbl-set-d').innerText = t.set_d;
@@ -371,20 +377,28 @@
 
             init: function() {
                 FavManager.init(); 
+                
+                document.getElementById('item-list').addEventListener('scroll', function() { 
+                    var el = this; 
+                    if(el.scrollTop + el.clientHeight >= el.scrollHeight - 50) { 
+                        App.loadMoreMobile(); 
+                    } 
+                });
+
                 if(localStorage.getItem('rc_cfg_filter')) this.cfg.filter = (localStorage.getItem('rc_cfg_filter') === 'true');
-                var savedFmt = localStorage.getItem('rc_cfg_format'); this.cfg.format = (savedFmt === 'm3u8_native' || savedFmt === 'ts_native') ? savedFmt : 'ts_native';
+                var savedFmt = localStorage.getItem('rc_cfg_format'); this.cfg.format = (savedFmt === 'm3u8_native' || savedFmt === 'ts_native') ? savedFmt : 'ts_native'; this.cfg.lang = 'pt'; 
                 this.applyLang(); PlayerEngine.init(); 
 
                 if(localStorage.getItem('rc_h')) {
                     document.getElementById('i0').value = localStorage.getItem('rc_h'); document.getElementById('i1').value = localStorage.getItem('rc_u'); document.getElementById('i2').value = localStorage.getItem('rc_p');
-                    document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n.load_init; App.login(true);
+                    document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n[this.cfg.lang].load_init; App.login(true);
                 } else { this.setScr(0); }
             },
 
             toggleCfg: function(type) { if(type === 'filter') { this.cfg.filter = !this.cfg.filter; localStorage.setItem('rc_cfg_filter', this.cfg.filter); } this.updateCfgUI(); },
             toggleFormat: function() { this.cfg.format = (this.cfg.format === 'ts_native') ? 'm3u8_native' : 'ts_native'; localStorage.setItem('rc_cfg_format', this.cfg.format); this.updateCfgUI(); },
-            updateCfgUI: function() { var t = this.i18n; document.getElementById('lbl-filter').innerText = this.cfg.filter ? t.yes : t.no; document.getElementById('s1').style.borderColor = this.cfg.filter ? '#00C851' : '#333'; document.getElementById('lbl-filter').style.color = this.cfg.filter ? '#00C851' : '#888'; var fLbl = this.cfg.format === 'm3u8_native' ? "M3U8 NAT" : "TS NAT"; document.getElementById('lbl-format').innerText = fLbl; document.getElementById('s2').style.borderColor = (this.cfg.format !== 'ts_native') ? '#00C851' : '#333'; document.getElementById('lbl-format').style.color = (this.cfg.format !== 'ts_native') ? '#00C851' : '#888'; },
-            
+            updateCfgUI: function() { var t = this.i18n[this.cfg.lang]; document.getElementById('lbl-filter').innerText = this.cfg.filter ? t.yes : t.no; document.getElementById('s1').style.borderColor = this.cfg.filter ? '#00C851' : '#333'; document.getElementById('lbl-filter').style.color = this.cfg.filter ? '#00C851' : '#888'; var fLbl = this.cfg.format === 'm3u8_native' ? "M3U8 NAT" : "TS NAT"; document.getElementById('lbl-format').innerText = fLbl; document.getElementById('s2').style.borderColor = (this.cfg.format !== 'ts_native') ? '#00C851' : '#333'; document.getElementById('lbl-format').style.color = (this.cfg.format !== 'ts_native') ? '#00C851' : '#888'; },
+
             req: function(url, cb) { 
                 var x = new XMLHttpRequest(); var cacheBuster = (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + new Date().getTime(); 
                 x.open("GET", url + cacheBuster, true); x.timeout = 20000; 
@@ -395,53 +409,57 @@
             login: function(isAuto) {
                 var h = document.getElementById('i0').value.trim(); var u = document.getElementById('i1').value.trim(); var p = document.getElementById('i2').value.trim();
                 if(h.endsWith('/')) h = h.slice(0, -1); if(h.indexOf('http') === -1) h = 'http://' + h;
-                if(!isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n.load_auth; requestNativeFullscreen(document.documentElement); } 
+                if(!isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n[this.cfg.lang].load_auth; requestNativeFullscreen(document.documentElement); } 
                 this.req(h+"/player_api.php?username="+u+"&password="+p, function(d){
                     document.getElementById('loader').classList.add('hide');
                     if(d === 'ERR_NET') { 
-                        if(isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = App.i18n.load_net; setTimeout(function(){ App.login(true); }, 5000); } 
-                        else { App.setScr(0); document.getElementById('msg-login').innerHTML = App.i18n.err_net; } return; 
+                        if(isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = App.i18n[App.cfg.lang].load_net; setTimeout(function(){ App.login(true); }, 5000); } 
+                        else { App.setScr(0); document.getElementById('msg-login').innerHTML = App.i18n[App.cfg.lang].err_net; } return; 
                     }
                     if(d && d.user_info && d.user_info.auth==1) {
                         App.creds={h:h,u:u,p:p}; localStorage.setItem('rc_h', h); localStorage.setItem('rc_u', u); localStorage.setItem('rc_p', p); App.userInfo = d.user_info; var info = d.user_info;
-                        var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : App.i18n.unlimited; var conn = (info.active_cons || 0) + " / " + (info.max_connections || 1);
-                        var created = info.created_at ? new Date(info.created_at*1000).toLocaleDateString('pt-BR') : App.i18n.unknown;
+                        var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unlimited; var conn = (info.active_cons || 0) + " / " + (info.max_connections || 1);
+                        var created = info.created_at ? new Date(info.created_at*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unknown;
                         
+                        // Painel de Configurações
+                        document.getElementById('set-user').innerText = info.username || u; document.getElementById('set-exp').innerText = exp; document.getElementById('set-conn').innerText = (info.max_connections || 1); document.getElementById('set-created').innerText = created;
+                        
+                        // Novo Painel de OSD
                         document.getElementById('osd-user').innerText = info.username || u;
                         document.getElementById('osd-exp').innerText = exp;
                         document.getElementById('osd-conn').innerText = conn;
                         
-                        document.getElementById('set-user').innerText = info.username || u; document.getElementById('set-exp').innerText = exp; document.getElementById('set-conn').innerText = (info.max_connections || 1); document.getElementById('set-created').innerText = created;
-                        
+                        // Abre a TV Ao Vivo automaticamente
                         App.openMode('live', true);
-                    } else { App.setScr(0); document.getElementById('msg-login').innerText = App.i18n.err_auth; localStorage.clear(); }
+                    } else { App.setScr(0); document.getElementById('msg-login').innerText = App.i18n[App.cfg.lang].err_auth; localStorage.clear(); }
                 });
             },
             logout: function() { PlayerEngine.hardStop(); localStorage.clear(); location.reload(); },
 
             setScr: function(n) {
-                this.lastScreenSwitch = new Date().getTime(); if(n!==2) { PlayerEngine.hardStop(); }
+                this.lastScreenSwitch = new Date().getTime(); if(n===1) { PlayerEngine.hardStop(); }
                 var layers = document.querySelectorAll('.layer'); for(var i=0; i<layers.length; i++) { layers[i].classList.add('hide'); }
                 if(n===0) document.getElementById('login-layer').classList.remove('hide'); 
-                if(n===2) document.getElementById('content-layer').classList.remove('hide'); 
+                if(n===2) { document.getElementById('content-layer').classList.remove('hide'); } 
                 if(n===3) document.getElementById('settings-layer').classList.remove('hide');
                 this.scr=n; this.zone=0; this.idx=0; this.updateFocus();
             },
 
             openSettings: function() { this.setScr(3); this.idx = 0; this.updateFocus(); requestNativeFullscreen(); }, 
-            closeSettings: function() { this.setScr(2); this.idx=0; this.updateFocus(); },
+            closeSettings: function() { App.openMode('live', true); },
 
             countGlobal: function() {
-                var t = App.i18n; var countEl = document.getElementById('item-count');
+                var actionStrm = 'get_live_streams';
+                var t = App.i18n[App.cfg.lang]; var typeStr = t.tot_chan; var countEl = document.getElementById('item-count');
                 var cacheKey = 'rc_total_live_' + App.creds.u; var cached = localStorage.getItem(cacheKey);
-                if(cached) { if(countEl) countEl.innerText = t.tot_pre + cached + " " + t.tot_chan; } else { if(countEl) countEl.innerText = "CONTANDO..."; }
+                if(cached) { if(countEl) countEl.innerText = t.tot_pre + cached + " " + typeStr; } else { if(countEl) countEl.innerText = "CONTANDO..."; }
 
-                this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams", function(d){
+                this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm, function(d){
                     if(d && d!=='ERR_NET') {
                         var total = 0; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado'];
                         if(App.cfg.filter) { for(var i=0; i<d.length; i++) { var nome = (d[i].name || d[i].title || "").toLowerCase(); var show = true; for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } } if(show) total++; } } else { total = d.length; }
                         d = null; try { localStorage.setItem(cacheKey, total); } catch(e) {}
-                        if(countEl) countEl.innerText = t.tot_pre + total + " " + t.tot_chan;
+                        if(countEl) countEl.innerText = t.tot_pre + total + " " + typeStr;
                     }
                 });
             },
@@ -449,13 +467,17 @@
             openMode: function(mode, isTrusted) {
                 if (!isTrusted && new Date().getTime() - (this.lastScreenSwitch || 0) < 500) return;
                 
-                this.fullData = []; this.categoryDataCache = null; this.lastCatIdx = -1;
+                this.fullData = null; this.categoryDataCache = null;
+                this.fullData = []; this.lastCatIdx = -1;
+                
                 document.getElementById('cat-list').innerHTML = ''; document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>';
                 
-                PlayerEngine.hardStop(); this.resetInfo(); requestNativeFullscreen();
+                App.currentMode = 'live'; PlayerEngine.hardStop(); this.resetInfo(); requestNativeFullscreen();
                 this.playingId = null; this.validCategories = null; this.setScr(2);
-                var t = App.i18n; document.getElementById('search').value = ''; setTimeout(function() { App.countGlobal(); }, 500); 
+                var t = App.i18n[App.cfg.lang]; document.getElementById('search').value = ''; setTimeout(function() { App.countGlobal(); }, 500); 
                 
+                var actionCat = 'get_live_categories';
+
                 var renderCats = function(d) {
                     var h = []; h.push('<div class="cat-item" role="button" tabindex="-1" id="c0" data-id="fav" onclick="App.catClick(0, true)">' + t.cat_fav + '</div>'); 
                     var count = 0; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado']; App.validCategories = {};
@@ -467,7 +489,7 @@
                     document.getElementById('cat-list').innerHTML = h.join(''); if(App.zone===0 && App.idx===0) { App.updateFocus(); }
                 };
 
-                this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_categories", function(d){
+                this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionCat, function(d){
                     if(d && d!=='ERR_NET') { renderCats(d); App.zone=0; App.idx=0; App.updateFocus(); }
                 });
             },
@@ -480,17 +502,18 @@
             },
 
             loadContent: function(catIdx, jumpFocus) {
-                if (catIdx === -1) return; 
-                var currentReq = ++App.reqId; // Evita Fantasmas
-                App.fullData = []; document.getElementById('item-list').innerHTML = ''; this.lastCatIdx = catIdx; 
+                if (catIdx === -1) return; document.getElementById('item-list').innerHTML = ''; this.lastCatIdx = catIdx; 
                 var el = document.getElementById('c'+catIdx); if(!el) return;
                 var cid = el.getAttribute('data-id'); var catItems = document.querySelectorAll('.cat-item'); for(var j=0; j<catItems.length; j++) { catItems[j].classList.remove('active'); } el.classList.add('active');
-                var t = App.i18n; document.getElementById('search').value = ''; document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 30px;"><i class="fas fa-circle-notch fa-spin"></i></div>';
+                var t = App.i18n[App.cfg.lang]; document.getElementById('search').value = ''; document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 30px;"><i class="fas fa-circle-notch fa-spin"></i></div>';
+                var actionStrm = 'get_live_streams';
 
                 var onData = function(d) { 
-                    if (currentReq !== App.reqId) return; 
                     if(d && d!=='ERR_NET') { 
                         var junk = ['adulto','xxx','sex','porn','+18','teste','off'];
+                        
+                        App.fullData = null; App.categoryDataCache = null;
+                        
                         if(App.cfg.filter) {
                             var res = []; for(var k=0; k<d.length; k++) { var nome = (d[k].name || d[k].title || "").toLowerCase(); var show = true; for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } } if(show) res.push(d[k]); }
                             App.fullData = res;
@@ -502,34 +525,59 @@
                 };
 
                 if(cid === 'fav') { 
-                    this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams", function(d){ 
+                    this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm, function(d){ 
                         if(d && d!=='ERR_NET') { 
-                            if (currentReq !== App.reqId) return;
                             var favs = d.filter(function(x){ var fId = x.stream_id || x.id; return FavManager.isFav(fId); }); 
+                            App.fullData = null; App.categoryDataCache = null;
                             App.fullData = favs; App.categoryDataCache = favs; if(jumpFocus && favs.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(); 
                         } 
                     }); 
                 } 
                 else { 
-                    this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams&category_id="+cid, function(d){
+                    this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm+"&category_id="+cid, function(d){
                         if(d && d!=='ERR_NET') { onData(d); } else { onData(null); }
                     }); 
                 }
             },
 
             renderList: function() {
-                var d = this.fullData; var max = d.length; var t = App.i18n; var listEl = document.getElementById('item-list'); 
+                var d = this.fullData; var max = d.length; var t = App.i18n[App.cfg.lang]; var listEl = document.getElementById('item-list'); 
                 var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = t.tot_pre + max;
                 if(max===0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; return; }
 
+                var currentListIdx = (this.zone === 2) ? this.idx : 0;
+                var currentPage = Math.floor(currentListIdx / this.pageSize); 
+                var start = currentPage * this.pageSize; 
+                var end = Math.min(start + this.pageSize, max);
+                
                 var h = [];
-                for(var i = 0; i < max; i++) {
+                for(var i = start; i < end; i++) {
                     var n = d[i].name || d[i].title; var id = d[i].stream_id || d[i].id; var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
                     var playingClass = (App.playingId == id) ? ' playing' : ''; 
                     h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
                 }
                 listEl.innerHTML = h.join(''); 
+                
+                this.mobileRenderedPages = currentPage + 1;
                 this.updateFocus();
+            },
+
+            loadMoreMobile: function() {
+                var max = this.fullData.length;
+                var start = this.mobileRenderedPages * this.pageSize;
+                if(start >= max) return; 
+                
+                var end = Math.min(start + this.pageSize, max);
+                var h = [];
+                for(var i = start; i < end; i++) {
+                    var n = this.fullData[i].name || this.fullData[i].title;
+                    var id = this.fullData[i].stream_id || this.fullData[i].id;
+                    var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
+                    var playingClass = (App.playingId == id) ? ' playing' : '';
+                    h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
+                }
+                document.getElementById('item-list').insertAdjacentHTML('beforeend', h.join(''));
+                this.mobileRenderedPages++;
             },
 
             itemClick: function(i, isTrusted) { 
@@ -537,17 +585,19 @@
                 this.idx=i; this.zone=2; this.updateFocus(); this.clickItem(); requestNativeFullscreen(); 
             },
             
-            clickItem: function() { var item = this.fullData[this.idx]; if(item) { this.playStream(item); } },
+            clickItem: function(forcePlay) { var item = this.fullData[this.idx]; if(item) { this.playStream(item); } },
 
             playStream: function(item) {
-                var id = item.stream_id || item.id; var url = ""; var t = App.i18n;
+                var id = item.stream_id || item.id; var url = ""; var t = App.i18n[App.cfg.lang];
                 var ext = this.cfg.format === 'm3u8_native' ? 'm3u8' : 'ts'; url = this.creds.h+"/live/"+this.creds.u+"/"+this.creds.p+"/"+id+"."+ext;
                 this.playingId = id; document.getElementById('meta-title').innerText = item.name || item.title; document.getElementById('meta-desc').innerText = "";
-                
+
                 PlayerEngine.play(url); 
                 var items = document.querySelectorAll('.item'); for(var k=0; k<items.length; k++) { items[k].classList.remove('playing'); }
                 var r = document.getElementById('row-'+this.idx); if(r) r.classList.add('playing'); 
             },
+
+            seek: function(sec) { return; }, 
             
             switchChannel: function(dir) {
                 if (!this.fullData || this.fullData.length === 0) return;
@@ -572,17 +622,21 @@
             doSearch: function(isGlobal) {
                 var rawT = document.getElementById('search').value; 
                 if(rawT.length === 0) { 
-                    if(App.lastCatIdx > -1) { App.loadContent(App.lastCatIdx); } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>'; App.fullData = []; App.renderList(); } return; 
+                    if(App.lastCatIdx > -1) { 
+                        document.getElementById('item-list').innerHTML = '';
+                        App.loadContent(App.lastCatIdx); 
+                    } else { 
+                        document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>'; 
+                        App.fullData = []; App.renderList(); 
+                    } 
+                    return; 
                 }
                 if(rawT.length < 2) return; var tStr = App.removeAccents(rawT); var listEl = document.getElementById('item-list');
                 
-                var currentReq = ++App.reqId; // Evita Fantasmas
-                App.fullData = []; // Limpa dados velhos imediatamente
-                
                 if (isGlobal) {
                     listEl.innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 2vh;"><i class="fas fa-circle-notch fa-spin" style="font-size: 5vh; margin-bottom: 15px;"></i><br><br>BUSCANDO...</div>';
-                    App.req(App.creds.h+"/player_api.php?username="+App.creds.u+"&password="+App.creds.p+"&action=get_live_streams", function(d) { 
-                        if (currentReq !== App.reqId) return;
+                    var actionStrm = 'get_live_streams';
+                    App.req(App.creds.h+"/player_api.php?username="+App.creds.u+"&password="+App.creds.p+"&action="+actionStrm, function(d) { 
                         if(d && d !== 'ERR_NET') { 
                             var res = []; var maxResults = 100; var junk = ['adulto','xxx','sex','porn','+18'];
                             for(var i=0; i<d.length; i++) { 
@@ -592,15 +646,14 @@
                             }
                             d = null; 
                             if (res.length > 0) { res.sort(App.smartSort); App.fullData = res; App.zone = 2; App.idx = 0; App.renderList(); } 
-                            else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum resultado encontrado no servidor global.</div>'; var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = App.i18n.tot_pre + "0"; }
+                            else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum resultado encontrado no servidor global.</div>'; var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = App.i18n[App.cfg.lang].tot_pre + "0"; }
                         } else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Erro na conexão com o servidor.</div>'; }
                     });
                 } else {
                     listEl.innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 30px;"><i class="fas fa-circle-notch fa-spin"></i></div>';
                     setTimeout(function() {
-                        if (currentReq !== App.reqId) return;
                         var baseData = App.categoryDataCache || App.fullData;
-                        if (!baseData || baseData.length === 0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+App.i18n.empty+'</div>'; return; }
+                        if (!baseData || baseData.length === 0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+App.i18n[App.cfg.lang].empty+'</div>'; return; }
                         var res = []; for(var i=0; i<baseData.length; i++) { var nome = baseData[i].name || baseData[i].title || ""; if(App.removeAccents(nome).indexOf(tStr) > -1) { res.push(baseData[i]); } }
                         if (res.length > 0) { App.fullData = res; App.renderList(); } else { listEl.innerHTML = '<div style="padding:20px; text-align:center; font-size:1.8vh; color:#888;">Não encontrado nesta categoria.<br><br><b style="color:var(--main-color);">APERTE ENTER PARA BUSCA GLOBAL</b></div>'; }
                     }, 50);
@@ -610,10 +663,16 @@
             handleVideoTap: function(e) {
                 e.preventDefault(); if(!App.playingId) return; 
                 var now = new Date().getTime(); var timeDiff = now - (App.lastTap || 0); App.lastTap = now;
-                if (timeDiff < 300 && timeDiff > 0) { clearTimeout(App.tapTimer); App.toggleFull(); } 
-                else { App.tapTimer = setTimeout(function() { App.toggleFull(); App.zone = 3; App.updateFocus(); }, 300); }
+
+                if (timeDiff < 300 && timeDiff > 0) { 
+                    clearTimeout(App.tapTimer); 
+                    App.toggleFull(); 
+                } else { 
+                    App.tapTimer = setTimeout(function() { App.toggleFull(); App.zone = 3; App.updateFocus(); }, 300); 
+                }
             },
             
+            togglePlay: function() { return; }, 
             toggleFull: function() { if(!this.playingId) return; var b = document.getElementById('vid-box'); if(b.classList.contains('fs')) { this.exitFull(); } else { b.classList.add('fs'); requestNativeFullscreen(b); } },
             exitFull: function() { document.getElementById('vid-box').classList.remove('fs'); document.getElementById('pause-layer').style.display = 'none'; try { if (document.exitFullscreen) { document.exitFullscreen(); } else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } } catch(e) {} this.syncFocusToPlaying(); },
             
@@ -621,8 +680,16 @@
                 if (!isTrusted && new Date().getTime() - (this.lastScreenSwitch || 0) < 500) return;
                 if(document.getElementById('vid-box').classList.contains('fs')) { this.exitFull(); return; }
                 if(this.zone===3) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); return; }
-                if(this.zone===2) { this.zone=0; this.idx=(this.lastCatIdx > -1 ? this.lastCatIdx : 0); this.updateFocus(); return; }
-                if(this.zone===1) { this.zone=2; this.idx=0; this.updateFocus(); return; }
+                if(this.zone===2) { 
+                    this.zone=0; this.idx=(this.lastCatIdx > -1 ? this.lastCatIdx : 0); this.updateFocus(); return; 
+                }
+                if(this.zone===1) {
+                    document.getElementById('search').value = '';
+                    App.fullData = App.categoryDataCache || [];
+                    App.renderList();
+                    this.zone=2; this.idx=0; this.updateFocus(); return; 
+                }
+                if(this.zone===0) { return; } // Apenas tecla azul abre configurações
             },
             
             updateFocus: function() {
@@ -652,14 +719,48 @@
             move: function(d) {
                 var s = this.scr;
                 if(s===0) { if(d===1 && this.idx < 3) this.idx++; if(d===0 && this.idx > 0) this.idx--; }
-                else if(s===3) { if(this.idx === 0) { if(d===1) this.idx = 1; } else if(this.idx === 1) { if(d===1) this.idx = 2; else if(d===0) this.idx = 0; } else if(this.idx === 2) { if(d===3) this.idx = 3; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; } else if(this.idx === 3) { if(d===2) this.idx = 2; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; } else if(this.idx === 4) { if(d===0) this.idx = 2; } }
+                else if(s===3) { 
+                    // Correção de navegação tela de configurações
+                    if(this.idx === 0) {
+                        if(d===1) this.idx = 1; 
+                    } else if(this.idx === 1) {
+                        if(d===0) this.idx = 0;
+                        else if(d===3) this.idx = 2;
+                        else if(d===1) this.idx = 3;
+                    } else if(this.idx === 2) {
+                        if(d===0) this.idx = 0;
+                        else if(d===2) this.idx = 1;
+                        else if(d===1) this.idx = 3;
+                    } else if(this.idx === 3) {
+                        if(d===0) this.idx = 1;
+                        else if(d===1) this.idx = 4;
+                    } else if(this.idx === 4) {
+                        if(d===0) this.idx = 3;
+                    }
+                }
                 else if(s===2) {
                     if(this.zone===3) { if(d===2) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); } return; }
                     if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; App.renderList(); } }
                     else if(this.zone===2) { 
                         var dataLen = App.fullData.length;
-                        if(d===1) { if(typeof this.idx === 'number' && this.idx < dataLen - 1) { this.idx++; } }
-                        else if(d===0) { if(typeof this.idx === 'number' && this.idx > 0) { this.idx--; } else if(this.idx === 0) { this.zone = 1; } } 
+                        if(d===1) { 
+                            if(typeof this.idx === 'number' && this.idx < dataLen - 1) { 
+                                var oldPage = Math.floor(this.idx / this.pageSize); 
+                                this.idx++; 
+                                var newPage = Math.floor(this.idx / this.pageSize); 
+                                if (oldPage !== newPage) this.renderList(); 
+                            } 
+                        }
+                        else if(d===0) { 
+                            if(typeof this.idx === 'number' && this.idx > 0) { 
+                                var oldPage = Math.floor(this.idx / this.pageSize); 
+                                this.idx--; 
+                                var newPage = Math.floor(this.idx / this.pageSize); 
+                                if (oldPage !== newPage) this.renderList(); 
+                            } else if(this.idx === 0) { 
+                                this.zone = 1; 
+                            } 
+                        } 
                         else if(d===2) { this.zone=0; this.idx=(this.lastCatIdx > -1 ? this.lastCatIdx : 0); } 
                         else if(d===3) { this.zone=3; }
                     } else if(this.zone===1) { if(d===1) { this.zone=2; this.idx=0; } if(d===2) { this.zone=0; this.idx=(this.lastCatIdx > -1 ? this.lastCatIdx : 0); } }
@@ -679,21 +780,22 @@
         document.addEventListener('keydown', function(e) {
             var k = e.keyCode;
             
-            var isLeft = (k===37); var isUp = (k===38); var isRight = (k===39); var isDown = (k===40);
+            var isLeft = (k===37);
+            var isUp = (k===38);
+            var isRight = (k===39);
+            var isDown = (k===40);
             var isEnter = (k===13 || k===295); 
             var isBack = (k===8 || k===27 || k===461 || k===10009 || k===88); 
             
-            var isRed = (k===403 || k===82); var isGreen = (k===404 || k===71);
-            var isYellow = (k===405 || k===89); var isBlue = (k===406 || k===66 || k===275); 
-            var isChUp = (k===427 || k===33); var isChDown = (k===428 || k===34); 
+            var isRed = (k===403 || k===82);
+            var isGreen = (k===404 || k===71);
+            var isYellow = (k===405 || k===89);
+            var isBlue = (k===406 || k===66 || k===275); 
+            var isChUp = (k===427 || k===33); 
+            var isChDown = (k===428 || k===34); 
 
             if(document.activeElement && document.activeElement.tagName === 'INPUT' && App.scr === 0) { if(isEnter || isDown) { e.preventDefault(); App.move(1); return; } if(isUp) { e.preventDefault(); App.move(0); return; } return; }
-            if(App.scr === 2 && document.activeElement && document.activeElement.tagName === 'INPUT') { 
-                if(isEnter) { e.preventDefault(); App.doSearch(true); return; } 
-                if(isDown) { e.preventDefault(); App.zone=2; App.idx=0; App.updateFocus(); return; } 
-                if(isLeft || isRight) { return; } 
-                return; // Impede digitação de acionar a lista
-            }
+            if(App.scr === 2 && document.activeElement && document.activeElement.tagName === 'INPUT') { if(isEnter) { App.doSearch(true); return; } if(isDown) { e.preventDefault(); App.zone=2; App.idx=0; App.updateFocus(); return; } if(isLeft || isRight) { return; } return; }
             
             if(App.scr === 2) {
                 if(isChUp) { e.preventDefault(); App.switchChannel(1); return; }
