@@ -118,7 +118,6 @@
 
         .cat-head { padding: 15px; background: #15151a; color: var(--main-color); border-bottom: 2px solid #222; text-align: center; font-size: var(--font-md); font-weight: 900; flex-shrink: 0; }
         .cat-top-row { display: flex; align-items: center; width: 100%; }
-        .btn-voltar { width: 4vh; height: 4vh; border-radius: 50%; border: 2px solid var(--main-color); display: flex; align-items: center; justify-content: center; font-size: var(--font-sm); margin-right: 1vw; color: var(--main-color); }
         
         .cat-list, .item-list { flex: 1; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; will-change: transform; transform: translateZ(0); touch-action: pan-y; }
         
@@ -191,15 +190,12 @@
             
             <div class="config-row" style="margin-top: 30px;"><div id="s0" class="toggle-btn focusable" style="border-color: #333; background: #111; cursor: default;">OPÇÕES</div></div>
             <div class="config-row">
-                <div id="s1" class="toggle-btn focusable" onclick="App.toggleLang()"><span id="lbl-set-lang">IDIOMA:</span> <span id="lbl-lang" style="color:#fff">🇧🇷 PT</span></div>
-            </div>
-            <div class="config-row">
-                <div id="s2" class="toggle-btn focusable" onclick="App.toggleCfg('filter')"><span id="lbl-set-filter">XXX:</span> <span id="lbl-filter" style="color:#fff">NÃO</span></div>
-                <div id="s3" class="toggle-btn focusable" onclick="App.toggleFormat()"><span id="lbl-set-format">FMT:</span> <span id="lbl-format" style="color:#fff">TS NAT</span></div>
+                <div id="s1" class="toggle-btn focusable" onclick="App.toggleCfg('filter')"><span id="lbl-set-filter">XXX:</span> <span id="lbl-filter" style="color:#fff">NÃO</span></div>
+                <div id="s2" class="toggle-btn focusable" onclick="App.toggleFormat()"><span id="lbl-set-format">FMT:</span> <span id="lbl-format" style="color:#fff">TS NAT</span></div>
             </div>
             
-            <button id="s4" class="btn focusable" onclick="App.closeSettings()" style="background: #333; color: #fff; margin-top: 20px;">VOLTAR</button>
-            <button id="s5" class="btn btn-logout focusable" onclick="App.logout()">SAIR / DESLOGAR</button>
+            <button id="s3" class="btn focusable" onclick="App.closeSettings()" style="background: #333; color: #fff; margin-top: 20px;">VOLTAR</button>
+            <button id="s4" class="btn btn-logout focusable" onclick="App.logout()">SAIR / DESLOGAR</button>
         </div>
     </div>
 
@@ -226,7 +222,6 @@
         <div class="col-cat">
             <div class="cat-head">
                 <div class="cat-top-row">
-                    <div id="btn-back" class="btn-voltar hide" onclick="App.back()"><i class="fas fa-arrow-left"></i></div>
                     <div id="cat-title-txt" style="flex:1;">MENU</div>
                 </div>
                 <div id="item-count" style="font-size: 0.7em; margin-top: 5px; opacity: 0.7;">TOTAL: ...</div>
@@ -412,7 +407,7 @@
                 document.getElementById('i0').placeholder = t.ph_dns; document.getElementById('i1').placeholder = t.ph_user; document.getElementById('i2').placeholder = t.ph_pass; document.getElementById('i3').innerText = t.btn_login;
                 document.getElementById('set-title-txt').innerHTML = '<i class="fas fa-user-shield" style="margin-right:10px; color: var(--main-color);"></i>' + t.set_title;
                 document.getElementById('lbl-set-u').innerText = t.set_u; document.getElementById('lbl-set-e').innerText = t.set_e; document.getElementById('lbl-set-c').innerText = t.set_c; document.getElementById('lbl-set-d').innerText = t.set_d;
-                document.getElementById('s0').innerText = t.set_opt; document.getElementById('lbl-set-filter').innerText = t.set_filter; document.getElementById('lbl-set-format').innerText = t.set_format; document.getElementById('lbl-set-lang').innerText = t.set_lang; document.getElementById('s4').innerText = t.set_back; document.getElementById('s5').innerText = t.btn_out;
+                document.getElementById('s0').innerText = t.set_opt; document.getElementById('lbl-set-filter').innerText = t.set_filter; document.getElementById('lbl-set-format').innerText = t.set_format; document.getElementById('s3').innerText = t.set_back; document.getElementById('s4').innerText = t.btn_out;
                 document.getElementById('dash-m0').innerText = t.dash_live; document.getElementById('dash-m1').innerText = t.dash_movie; document.getElementById('dash-m2').innerText = t.dash_series;
                 document.getElementById('lbl-exp-txt').innerText = t.lbl_exp; document.getElementById('lbl-conn-txt').innerText = t.lbl_conn;
                 document.getElementById('cat-title-txt').innerText = t.cat_title; document.getElementById('search').placeholder = t.search_ph;
@@ -448,8 +443,7 @@
 
             toggleCfg: function(type) { if(type === 'filter') { this.cfg.filter = !this.cfg.filter; localStorage.setItem('rc_cfg_filter', this.cfg.filter); } this.updateCfgUI(); },
             toggleFormat: function() { this.cfg.format = (this.cfg.format === 'ts_native') ? 'm3u8_native' : 'ts_native'; localStorage.setItem('rc_cfg_format', this.cfg.format); this.updateCfgUI(); },
-            toggleLang: function() { },
-            updateCfgUI: function() { var t = this.i18n[this.cfg.lang]; document.getElementById('lbl-filter').innerText = this.cfg.filter ? t.yes : t.no; document.getElementById('s2').style.borderColor = this.cfg.filter ? '#00C851' : '#333'; document.getElementById('lbl-filter').style.color = this.cfg.filter ? '#00C851' : '#888'; var fLbl = this.cfg.format === 'm3u8_native' ? "M3U8 NAT" : "TS NAT"; document.getElementById('lbl-format').innerText = fLbl; document.getElementById('s3').style.borderColor = (this.cfg.format !== 'ts_native') ? '#00C851' : '#333'; document.getElementById('lbl-format').style.color = (this.cfg.format !== 'ts_native') ? '#00C851' : '#888'; },
+            updateCfgUI: function() { var t = this.i18n[this.cfg.lang]; document.getElementById('lbl-filter').innerText = this.cfg.filter ? t.yes : t.no; document.getElementById('s1').style.borderColor = this.cfg.filter ? '#00C851' : '#333'; document.getElementById('lbl-filter').style.color = this.cfg.filter ? '#00C851' : '#888'; var fLbl = this.cfg.format === 'm3u8_native' ? "M3U8 NAT" : "TS NAT"; document.getElementById('lbl-format').innerText = fLbl; document.getElementById('s2').style.borderColor = (this.cfg.format !== 'ts_native') ? '#00C851' : '#333'; document.getElementById('lbl-format').style.color = (this.cfg.format !== 'ts_native') ? '#00C851' : '#888'; },
             
             updateClock: function() { 
                 var now = new Date(); var h = now.getHours(); var m = now.getMinutes(); if(m<10) m='0'+m; 
@@ -505,13 +499,13 @@
                 this.lastScreenSwitch = new Date().getTime(); if(n===1) { PlayerEngine.hardStop(); }
                 var layers = document.querySelectorAll('.layer'); for(var i=0; i<layers.length; i++) { layers[i].classList.add('hide'); }
                 if(n===0) document.getElementById('login-layer').classList.remove('hide'); if(n===1) document.getElementById('dash-layer').classList.remove('hide');
-                if(n===2) { document.getElementById('content-layer').classList.remove('hide'); document.getElementById('btn-back').classList.remove('hide'); } else { var btn = document.getElementById('btn-back'); if(btn) btn.classList.add('hide'); }
+                if(n===2) { document.getElementById('content-layer').classList.remove('hide'); }
                 if(n===3) document.getElementById('settings-layer').classList.remove('hide');
                 this.scr=n; this.zone=0; this.idx=0; this.updateFocus();
             },
 
             openSettings: function() { this.setScr(3); this.idx = 0; this.updateFocus(); requestNativeFullscreen(); }, 
-            closeSettings: function() { if(this.currentMode) { App.openMode(this.currentMode, true); } else { this.setScr(1); this.idx=3; this.updateFocus(); } },
+            closeSettings: function() { if(this.currentMode) { App.openMode(this.currentMode, true); } else { this.setScr(1); this.idx=0; this.updateFocus(); } },
 
             countGlobal: function(mode) {
                 var actionStrm = mode === 'live' ? 'get_live_streams' : (mode === 'movie' ? 'get_vod_streams' : 'get_series');
@@ -805,7 +799,13 @@
                 var s = this.scr;
                 if(s===0) { if(d===1 && this.idx < 3) this.idx++; if(d===0 && this.idx > 0) this.idx--; }
                 else if(s===1) { if(this.idx === 0) { if(d===3) this.idx=1; else if(d===0) this.idx=3; } else if(this.idx === 1) { if(d===3) this.idx=2; else if(d===2) this.idx=0; else if(d===0) this.idx=3; } else if(this.idx === 2) { if(d===2) this.idx=1; else if(d===0) this.idx=3; } else if(this.idx === 3) { if(d===1) this.idx=0; } }
-                else if(s===3) { if(this.idx === 0) { if(d===1) this.idx = 1; } else if(this.idx === 1) { if(d===1) this.idx = 2; else if(d===0) this.idx = 0; } else if(this.idx === 2) { if(d===3) this.idx = 3; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; } else if(this.idx === 3) { if(d===2) this.idx = 2; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; } else if(this.idx === 4) { if(d===0) this.idx = 2; else if(d===3) this.idx = 5; } else if(this.idx === 5) { if(d===2) this.idx = 4; else if(d===0) this.idx = 3; } }
+                else if(s===3) { 
+                    if(this.idx === 0) { if(d===1) this.idx = 1; } 
+                    else if(this.idx === 1) { if(d===3) this.idx = 2; else if(d===1) this.idx = 3; else if(d===0) this.idx = 0; } 
+                    else if(this.idx === 2) { if(d===2) this.idx = 1; else if(d===1) this.idx = 3; else if(d===0) this.idx = 0; } 
+                    else if(this.idx === 3) { if(d===1) this.idx = 4; else if(d===0) this.idx = 1; } 
+                    else if(this.idx === 4) { if(d===0) this.idx = 3; } 
+                }
                 else if(s===2) {
                     if(this.zone===3) { if(d===2) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); } return; }
                     if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; App.renderList(false); } }
@@ -839,7 +839,7 @@
                 var currentScr = this.scr; 
                 if(currentScr===0) { if(this.idx === 3) this.login(false); else if(this.idx < 3) this.move(1); }
                 else if(currentScr===1) { if(this.idx === 3) this.logout(); else if(this.idx === 0) this.openMode('live', true); else if(this.idx === 1) this.openMode('movie', true); else if(this.idx === 2) this.openMode('series', true); }
-                else if(currentScr===3) { if(this.idx === 1) this.toggleLang(); else if(this.idx === 2) this.toggleCfg('filter'); else if(this.idx === 3) this.toggleFormat(); else if(this.idx === 4) this.closeSettings(); else if(this.idx === 5) this.logout(); }
+                else if(currentScr===3) { if(this.idx === 1) this.toggleCfg('filter'); else if(this.idx === 2) this.toggleFormat(); else if(this.idx === 3) this.closeSettings(); else if(this.idx === 4) this.logout(); }
                 else if(currentScr===2) { if(this.zone===0) this.catClick(this.idx, true); else if(this.zone===1) this.doSearch(true); else if(this.zone===2) { this.clickItem(); } else if(this.zone===3) this.toggleFull(); }
             }
         };
