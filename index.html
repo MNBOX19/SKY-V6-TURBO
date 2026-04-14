@@ -93,7 +93,12 @@
         .cat-head { padding: 15px; background: #15151a; color: var(--main-color); border-bottom: 2px solid #222; text-align: center; font-size: var(--font-md); font-weight: 900; flex-shrink: 0; }
         .cat-top-row { display: flex; align-items: center; width: 100%; }
         
-        .cat-list, .item-list { flex: 1; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; will-change: transform; transform: translateZ(0); touch-action: pan-y; }
+        /* OTIMIZAÇÃO: CSS Containment para as listas não travarem a TV no scroll */
+        .cat-list, .item-list { 
+            flex: 1; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+            will-change: transform; transform: translateZ(0); touch-action: pan-y;
+            contain: content;
+        }
         
         .cat-item, .item { padding: 14px 20px; border-radius: 6px; margin: 6px 12px; color: #888; font-size: var(--font-sm); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid transparent; }
         .cat-item.active { background: #1a1a1a; color: #fff; border-left: 4px solid var(--main-color); }
@@ -121,10 +126,10 @@
         .meta-title { font-size: var(--font-lg); color: var(--main-color); font-weight: 900; margin-bottom: 1vh; }
         .meta-desc { font-size: var(--font-sm); color: #999; margin-bottom: 1vh; }
         
-        /* BARRA DE INFORMAÇÕES DO USUÁRIO CORRIGIDA */
+        /* BARRA DE INFORMAÇÕES - SEM ÍCONES E COM PROTEÇÃO DE QUEBRA DE LINHA */
         .user-info-bar {
             display: flex;
-            justify-content: space-around; /* Distribui o espaço por igual */
+            justify-content: space-around;
             align-items: center;
             background: #111;
             border: 1px solid #222;
@@ -149,7 +154,6 @@
             font-weight: 900;
             white-space: nowrap; /* Impede a quebra de linha no valor */
         }
-        .user-info-bar i { margin-right: 0.5vw; }
 
         .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid #1a1a1a; flex-shrink: 0; }
         .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 700; background: #1a1a1a; border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
@@ -233,9 +237,9 @@
                 <div id="meta-desc" class="meta-desc"></div>
                 
                 <div class="user-info-bar" id="osd-info-bar">
-                    <div><i class="fas fa-user"></i> USUÁRIO: <span id="osd-user" class="val">...</span></div>
-                    <div><i class="fas fa-calendar-alt"></i> VENCE: <span id="osd-exp" class="val">...</span></div>
-                    <div><i class="fas fa-tv"></i> TELAS: <span id="osd-conn" class="val">...</span></div>
+                    <div>USUÁRIO: <span id="osd-user" class="val">...</span></div>
+                    <div>VENCE: <span id="osd-exp" class="val">...</span></div>
+                    <div>TELAS: <span id="osd-conn" class="val">...</span></div>
                 </div>
 
                 <div class="keys">
@@ -451,16 +455,13 @@
                         var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unlimited; 
                         var created = info.created_at ? new Date(info.created_at*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unknown;
                         
-                        // Formata o número de telas como "0 / 1", "1 / 2", etc.
                         var connStr = (info.active_cons || 0) + " / " + (info.max_connections || 1);
 
-                        // Atualiza a aba "MINHA CONTA"
                         document.getElementById('set-user').innerText = info.username || u; 
                         document.getElementById('set-exp').innerText = exp; 
                         document.getElementById('set-conn').innerText = connStr; 
                         document.getElementById('set-created').innerText = created;
                         
-                        // Atualiza a Barra de Informações na TV
                         document.getElementById('osd-user').innerText = info.username || u;
                         document.getElementById('osd-exp').innerText = exp;
                         document.getElementById('osd-conn').innerText = connStr;
@@ -532,6 +533,12 @@
                 if (i === -1) return; this.idx=i; this.zone=0; this.loadContent(i, true); 
             },
 
+            // OTIMIZAÇÃO: Regex rápido para indexação
+            removeAccents: function(s) { 
+                if(!s) return ""; 
+                return s.toLowerCase().replace(/[áàãâä]/g, 'a').replace(/[éèêë]/g, 'e').replace(/[íìîï]/g, 'i').replace(/[óòõôö]/g, 'o').replace(/[úùûü]/g, 'u').replace(/[ç]/g, 'c'); 
+            },
+
             loadContent: function(catIdx, jumpFocus) {
                 if (catIdx === -1) return; document.getElementById('item-list').innerHTML = ''; this.lastCatIdx = catIdx; 
                 var el = document.getElementById('c'+catIdx); if(!el) return;
@@ -542,13 +549,26 @@
                     if(d && d!=='ERR_NET') { 
                         var junk = ['adulto','xxx','sex','porn','+18','teste','off'];
                         
-                        App.fullData = null; App.categoryDataCache = null;
+                        App.fullData = []; App.categoryDataCache = null;
                         
-                        if(App.cfg.filter) {
-                            var res = []; for(var k=0; k<d.length; k++) { var nome = (d[k].name || d[k].title || "").toLowerCase(); var show = true; for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } } if(show) res.push(d[k]); }
-                            App.fullData = res;
-                        } else { App.fullData = d; }
+                        // OTIMIZAÇÃO: Pré-indexa os nomes na hora de carregar a lista (deixa a busca mil vezes mais rápida)
+                        var isFilter = App.cfg.filter;
+                        for(var k=0; k<d.length; k++) { 
+                            var nome = d[k].name || d[k].title || ""; 
+                            d[k]._sn = App.removeAccents(nome);
+                            
+                            var show = true; 
+                            if(isFilter) { 
+                                for(var j=0; j<junk.length; j++) { 
+                                    if(d[k]._sn.indexOf(junk[j]) > -1) { show = false; break; } 
+                                } 
+                            } 
+                            if(show) App.fullData.push(d[k]); 
+                        }
+                        
                         App.categoryDataCache = App.fullData;
+                        d = null; // GC
+                        
                         if(jumpFocus && App.fullData.length > 0) { App.zone = 2; App.idx = 0; }
                         App.renderList(false); 
                     } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; }
@@ -557,9 +577,16 @@
                 if(cid === 'fav') { 
                     this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams", function(d){ 
                         if(d && d!=='ERR_NET') { 
-                            var favs = d.filter(function(x){ var fId = x.stream_id || x.id; return FavManager.isFav(fId); }); 
-                            App.fullData = null; App.categoryDataCache = null;
-                            App.fullData = favs; App.categoryDataCache = favs; if(jumpFocus && favs.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(false); 
+                            App.fullData = []; App.categoryDataCache = null;
+                            for(var x=0; x<d.length; x++) {
+                                var fId = d[x].stream_id || d[x].id;
+                                if(FavManager.isFav(fId)) {
+                                    d[x]._sn = App.removeAccents(d[x].name || d[x].title || "");
+                                    App.fullData.push(d[x]);
+                                }
+                            }
+                            App.categoryDataCache = App.fullData; d = null;
+                            if(jumpFocus && App.fullData.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(false); 
                         } 
                     }); 
                 } 
@@ -571,7 +598,7 @@
             },
 
             renderList: function(append) {
-                var d = this.fullData; var max = d.length; var t = App.i18n[App.cfg.lang]; var listEl = document.getElementById('item-list'); 
+                var d = this.fullData; if(!d) return; var max = d.length; var t = App.i18n[App.cfg.lang]; var listEl = document.getElementById('item-list'); 
                 if(max===0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; return; }
 
                 if(!append) { 
@@ -637,15 +664,16 @@
                     } 
                 } 
             },
-            
-            removeAccents: function(s) { if(!s) return ""; var str = s.toLowerCase(); str = str.replace(/[áàãâä]/g, 'a'); str = str.replace(/[éèêë]/g, 'e'); str = str.replace(/[íìîï]/g, 'i'); str = str.replace(/[óòõôö]/g, 'o'); str = str.replace(/[úùûü]/g, 'u'); str = str.replace(/[ç]/g, 'c'); return str; },
 
+            // OTIMIZAÇÃO: Busca instantânea via cache local (_sn)
             doSearch: function(isGlobal) {
                 var rawT = document.getElementById('search').value; 
                 if(rawT.length === 0) { 
                     if(App.lastCatIdx > -1) { App.loadContent(App.lastCatIdx); } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>'; App.fullData = []; App.renderList(false); } return; 
                 }
-                if(rawT.length < 2) return; var tStr = App.removeAccents(rawT); var listEl = document.getElementById('item-list');
+                if(rawT.length < 2) return; 
+                var tStr = App.removeAccents(rawT); 
+                var listEl = document.getElementById('item-list');
                 
                 if (isGlobal) {
                     listEl.innerHTML = '<div style="padding:20px; text-align:center; color: var(--main-color); font-size: 2vh;"><i class="fas fa-circle-notch fa-spin" style="font-size: 5vh; margin-bottom: 15px;"></i><br><br>BUSCANDO...</div>';
@@ -653,9 +681,11 @@
                         if(d && d !== 'ERR_NET') { 
                             var res = []; var maxResults = 100; var junk = ['adulto','xxx','sex','porn','+18'];
                             for(var i=0; i<d.length; i++) { 
-                                var nome = d[i].name || d[i].title || ""; var show = true;
-                                if(App.cfg.filter) { var lowerNome = nome.toLowerCase(); for(var j=0; j<junk.length; j++) { if(lowerNome.indexOf(junk[j]) > -1) { show = false; break; } } }
-                                if(show && App.removeAccents(nome).indexOf(tStr) > -1) { res.push(d[i]); if(res.length >= maxResults) break; } 
+                                var nome = d[i].name || d[i].title || ""; 
+                                d[i]._sn = App.removeAccents(nome);
+                                var show = true;
+                                if(App.cfg.filter) { for(var j=0; j<junk.length; j++) { if(d[i]._sn.indexOf(junk[j]) > -1) { show = false; break; } } }
+                                if(show && d[i]._sn.indexOf(tStr) > -1) { res.push(d[i]); if(res.length >= maxResults) break; } 
                             }
                             d = null; 
                             if (res.length > 0) { res.sort(App.smartSort); App.fullData = res; App.zone = 2; App.idx = 0; App.renderList(false); } 
@@ -667,9 +697,12 @@
                     setTimeout(function() {
                         var baseData = App.categoryDataCache || App.fullData;
                         if (!baseData || baseData.length === 0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+App.i18n[App.cfg.lang].empty+'</div>'; return; }
-                        var res = []; for(var i=0; i<baseData.length; i++) { var nome = baseData[i].name || baseData[i].title || ""; if(App.removeAccents(nome).indexOf(tStr) > -1) { res.push(baseData[i]); } }
+                        var res = []; 
+                        for(var i=0; i<baseData.length; i++) { 
+                            if(baseData[i]._sn.indexOf(tStr) > -1) { res.push(baseData[i]); } 
+                        }
                         if (res.length > 0) { App.fullData = res; App.renderList(false); } else { listEl.innerHTML = '<div style="padding:20px; text-align:center; font-size:1.8vh; color:#888;">Não encontrado nesta categoria.<br><br><b style="color:var(--main-color);">APERTE ENTER PARA BUSCA GLOBAL</b></div>'; }
-                    }, 50);
+                    }, 10);
                 }
             },
             
@@ -710,8 +743,9 @@
                         while(parentContainer && parentContainer !== document.body) {
                             var style = window.getComputedStyle(parentContainer);
                             if(style.overflowY === 'auto' || style.overflowY === 'scroll') {
-                                try { parentContainer.scrollTo({ top: el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2), behavior: 'smooth' }); } 
-                                catch(e) { parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2); } break;
+                                // OTIMIZAÇÃO: Scroll exato e matemático (livra a GPU da TV de calcular interpolações de movimento)
+                                parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2);
+                                break;
                             }
                             parentContainer = parentContainer.parentElement;
                         }
