@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#000000">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     
-    <title>IPTV OSCORP</title>
+    <title>SKY GOLD</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -36,6 +36,22 @@
         .hide { display: none !important; }
         .flex-center { display: flex; align-items: center; justify-content: center; }
         .layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; overflow: hidden; }
+
+        /* --- SPLASH SCREEN --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #000; z-index: 999999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .splash-logo {
+            font-size: 10vh; font-weight: 900;
+            animation: pulseLogo 2s infinite ease-in-out, popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .splash-spinner { margin-top: 4vh; font-size: 6vh; color: var(--main-color); }
+        
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes pulseLogo { 0%, 100% { transform: scale(1); text-shadow: 0 0 0 rgba(255, 215, 0, 0); } 50% { transform: scale(1.05); text-shadow: 0 0 25px rgba(255, 215, 0, 0.6); } }
 
         #orientation-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -68,17 +84,6 @@
         .config-row { display: flex; gap: 1vw; margin: 2vh 0; }
         .toggle-btn { flex: 1; padding: 1.5vh; background: #1a1a1a; border: 1px solid #333; color: #888; font-size: var(--font-sm); font-weight: 800; border-radius: 1vh; }
         .info-row { display: flex; justify-content: space-between; padding: 1vh 0; border-bottom: 1px solid #222; font-size: var(--font-sm); color: #ccc; }
-        
-        .dash-logo { font-size: var(--font-lg); font-weight: 900; }
-        .dash-clock { text-align: right; }
-        .clock-time { font-size: 6vh; font-weight: 700; color: #eee; line-height: 1; }
-        .clock-date { font-size: 2.5vh; color: #ccc; font-weight: 600; margin-top: 0.8vh; }
-        
-        @keyframes pulse-btn {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
-            50% { transform: scale(1.15); box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
-        }
         
         #content-layer { display: flex; width: 100%; height: 100%; background: #000; overflow: hidden; }
         .col-cat { width: 25%; background: #08080a; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; height: 100%; overflow: hidden; }
@@ -116,7 +121,7 @@
         .meta-title { font-size: var(--font-lg); color: var(--main-color); font-weight: 900; margin-bottom: 1vh; }
         .meta-desc { font-size: var(--font-sm); color: #999; margin-bottom: 1vh; }
         
-        .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid #1a1a1a; margin-top: auto; flex-shrink: 0; }
+        .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid #1a1a1a; flex-shrink: 0; }
         .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 700; background: #1a1a1a; border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
 
@@ -129,19 +134,19 @@
 </head>
 <body onload="App.init()">
 
+    <div id="splash-screen">
+        <div class="splash-logo"><span style="color:#fff">SKY</span> <span class="theme-text">GOLD</span></div>
+        <i class="fas fa-circle-notch fa-spin splash-spinner"></i>
+    </div>
+
     <div id="orientation-overlay">
         <i class="fas fa-mobile-alt phone-icon"></i>
         <div>POR FAVOR<br><span style="color: var(--main-color);">GIRE A TELA</span></div>
     </div>
 
-    <div id="loader" class="hide flex-center">
-        <i class="fas fa-circle-notch fa-spin" style="margin-bottom:20px; font-size: 8vh;"></i>
-        <div id="load-txt">CARREGANDO SISTEMA...</div>
-    </div>
-
     <div id="login-layer" class="layer flex-center hide">
         <div class="login-box">
-            <div class="logo-txt"><span style="color:#fff">IPTV</span>&nbsp;<span class="theme-text">OSCORP</span></div>
+            <div class="logo-txt"><span style="color:#fff">SKY</span>&nbsp;<span class="theme-text">GOLD</span></div>
             <input type="text" id="i0" class="inp focusable" placeholder="URL DNS" autocomplete="off">
             <input type="text" id="i1" class="inp focusable" placeholder="USUÁRIO" autocomplete="off">
             <input type="password" id="i2" class="inp focusable" placeholder="SENHA" autocomplete="off">
@@ -199,10 +204,16 @@
             </div>
             
             <div class="meta">
-                <div id="meta-title" class="meta-title"><span style="color:#fff">IPTV</span>&nbsp;OSCORP</div>
+                <div id="meta-title" class="meta-title"><span style="color:#fff">SKY</span>&nbsp;GOLD</div>
                 <div id="meta-desc" class="meta-desc"></div>
                 
-                <div class="keys">
+                <div id="quick-info-bar" style="display: none; justify-content: space-between; align-items: center; padding: 0 1vw 2vh 1vw; margin-top: auto; flex-shrink: 0;">
+                    <div style="font-size: var(--font-sm); color: #ccc; font-weight: 800;"><i class="fas fa-user" style="color: var(--main-color); margin-right: 8px;"></i> <span id="qi-user">...</span></div>
+                    <div style="font-size: var(--font-sm); color: #ccc; font-weight: 800;"><i class="fas fa-calendar-alt" style="color: var(--main-color); margin-right: 8px;"></i> <span id="qi-exp">...</span></div>
+                    <div style="font-size: var(--font-sm); color: #ccc; font-weight: 800;"><i class="fas fa-tv" style="color: var(--main-color); margin-right: 8px;"></i> <span id="qi-conn">...</span></div>
+                </div>
+
+                <div class="keys" style="margin-top: 0;">
                     <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000; box-shadow: 0 0 10px #FF0000;"></div> TELA CHEIA</div>
                     <div class="key" id="key-top"><div class="dot" style="background-color:#00C851; box-shadow: 0 0 10px #00C851;"></div> TOPO</div>
                     <div class="key" id="key-search"><div class="dot" style="background-color:#ffbb33; box-shadow: 0 0 10px #ffbb33;"></div> BUSCAR</div>
@@ -380,10 +391,22 @@
                 this.updateClock();
                 setInterval(function(){ App.updateClock(); }, 60000); 
 
+                // SPLASH SCREEN START
+                var splash = document.getElementById('splash-screen');
+                if(splash) { splash.style.display = 'flex'; splash.style.opacity = '1'; }
+
                 if(localStorage.getItem('rc_h')) {
                     document.getElementById('i0').value = localStorage.getItem('rc_h'); document.getElementById('i1').value = localStorage.getItem('rc_u'); document.getElementById('i2').value = localStorage.getItem('rc_p');
-                    document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n[this.cfg.lang].load_init; App.login(true);
-                } else { this.setScr(0); }
+                    App.login(true);
+                } else { 
+                    setTimeout(function() {
+                        if(splash) {
+                            splash.style.opacity = '0';
+                            setTimeout(function() { splash.style.display = 'none'; }, 500);
+                        }
+                        App.setScr(0);
+                    }, 2000);
+                }
             },
 
             toggleCfg: function(type) { if(type === 'filter') { this.cfg.filter = !this.cfg.filter; localStorage.setItem('rc_cfg_filter', this.cfg.filter); } this.updateCfgUI(); },
@@ -418,11 +441,25 @@
             login: function(isAuto) {
                 var h = document.getElementById('i0').value.trim(); var u = document.getElementById('i1').value.trim(); var p = document.getElementById('i2').value.trim();
                 if(h.endsWith('/')) h = h.slice(0, -1); if(h.indexOf('http') === -1) h = 'http://' + h;
-                if(!isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n[this.cfg.lang].load_auth; requestNativeFullscreen(document.documentElement); } 
+                
+                var splash = document.getElementById('splash-screen');
+                if(!isAuto && splash) { 
+                    splash.style.display = 'flex'; 
+                    setTimeout(function(){ splash.style.opacity = '1'; }, 10); 
+                    requestNativeFullscreen(document.documentElement); 
+                } 
+
                 this.req(h+"/player_api.php?username="+u+"&password="+p, function(d){
-                    document.getElementById('loader').classList.add('hide');
+                    if(splash) {
+                        splash.style.opacity = '0';
+                        setTimeout(function(){ splash.style.display = 'none'; }, 500);
+                    }
+
                     if(d === 'ERR_NET') { 
-                        if(isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = App.i18n[App.cfg.lang].load_net; setTimeout(function(){ App.login(true); }, 5000); } 
+                        if(isAuto) { 
+                            if(splash) { splash.style.display = 'flex'; splash.style.opacity = '1'; }
+                            setTimeout(function(){ App.login(true); }, 5000); 
+                        } 
                         else { App.setScr(0); document.getElementById('msg-login').innerHTML = App.i18n[App.cfg.lang].err_net; } return; 
                     }
                     if(d && d.user_info && d.user_info.auth==1) {
@@ -430,6 +467,12 @@
                         var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unlimited; var conn = (info.active_cons || 0) + " / " + (info.max_connections || 1);
                         var created = info.created_at ? new Date(info.created_at*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unknown;
                         document.getElementById('set-user').innerText = info.username || u; document.getElementById('set-exp').innerText = exp; document.getElementById('set-conn').innerText = (info.max_connections || 1); document.getElementById('set-created').innerText = created;
+                        
+                        // Atualiza Quick Info Bar na tela principal
+                        var qiUser = document.getElementById('qi-user'); if(qiUser) qiUser.innerText = info.username || u;
+                        var qiExp = document.getElementById('qi-exp'); if(qiExp) qiExp.innerText = exp;
+                        var qiConn = document.getElementById('qi-conn'); if(qiConn) qiConn.innerText = conn;
+
                         App.openMode('live', true);
                     } else { App.setScr(0); document.getElementById('msg-login').innerText = App.i18n[App.cfg.lang].err_auth; localStorage.clear(); }
                 });
@@ -485,6 +528,10 @@
                 
                 mode = 'live'; App.currentMode = mode; PlayerEngine.hardStop(); this.resetInfo(); requestNativeFullscreen();
                 this.playingId = null; this.validCategories = null; this.setScr(2);
+                
+                var qiBar = document.getElementById('quick-info-bar');
+                if (qiBar) { qiBar.style.display = 'flex'; }
+
                 var t = App.i18n[App.cfg.lang]; document.getElementById('search').value = ''; setTimeout(function() { App.countGlobal(mode); }, 500); 
                 
                 var actionCat = 'get_live_categories';
@@ -505,7 +552,7 @@
                 });
             },
             
-            resetInfo: function() { document.getElementById('meta-title').innerHTML = '<span style="color:#fff">IPTV</span>&nbsp;OSCORP'; document.getElementById('meta-desc').innerText = ""; PlayerEngine.hardStop(); document.getElementById('pause-layer').style.display = 'none'; },
+            resetInfo: function() { document.getElementById('meta-title').innerHTML = '<span style="color:#fff">SKY</span>&nbsp;GOLD'; document.getElementById('meta-desc').innerText = ""; PlayerEngine.hardStop(); document.getElementById('pause-layer').style.display = 'none'; },
             
             catClick: function(i, isTrusted) { 
                 if (!isTrusted && new Date().getTime() - (this.lastScreenSwitch || 0) < 500) return;
