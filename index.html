@@ -90,12 +90,6 @@
         .clock-time { font-size: 6vh; font-weight: 700; color: #eee; line-height: 1; }
         .clock-date { font-size: 2.5vh; color: #ccc; font-weight: 600; margin-top: 0.8vh; }
         
-        @keyframes pulse-btn {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
-            50% { transform: scale(1.15); box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
-        }
-        
         #content-layer { display: flex; width: 100%; height: 100%; background: #000; overflow: hidden; }
         .col-cat { width: 25%; background: #08080a; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; height: 100%; overflow: hidden; }
         .col-list { width: 35%; background: #101014; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; height: 100%; overflow: hidden; }
@@ -136,6 +130,7 @@
         .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 700; background: #1a1a1a; border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
 
+        #loader { background: #000; z-index: 20000; flex-direction: column; color: var(--main-color); font-weight: 900; font-size: var(--font-lg); }
         #pause-layer { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 9000; align-items: center; justify-content: center; pointer-events: none; }
         
         ::-webkit-scrollbar { width: 6px; }
@@ -152,6 +147,11 @@
     <div id="orientation-overlay">
         <i class="fas fa-mobile-alt phone-icon"></i>
         <div>POR FAVOR<br><span style="color: var(--main-color);">GIRE A TELA</span></div>
+    </div>
+
+    <div id="loader" class="hide flex-center">
+        <i class="fas fa-circle-notch fa-spin" style="margin-bottom:20px; font-size: 8vh;"></i>
+        <div id="load-txt">CARREGANDO SISTEMA...</div>
     </div>
 
     <div id="login-layer" class="layer flex-center hide">
@@ -193,6 +193,21 @@
                 <div id="item-count" style="font-size: 0.7em; margin-top: 5px; opacity: 0.7;">TOTAL: ...</div>
             </div>
             <div id="cat-list" class="cat-list"></div>
+            
+            <div class="bottom-bar" style="flex-direction: column; padding: 15px; border-top: 2px solid #222; background: #0a0a0c;">
+                <div style="margin-bottom: 10px;">
+                    <span class="lbl" style="font-size: var(--font-xs); color: #999; display: block; font-weight: 700;">USUÁRIO</span>
+                    <span id="info-user" class="val" style="font-size: var(--font-sm); color: var(--main-color); font-weight: 900;">...</span>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <span class="lbl" style="font-size: var(--font-xs); color: #999; display: block; font-weight: 700;">VENCIMENTO</span>
+                    <span id="info-exp" class="val" style="font-size: var(--font-sm); color: var(--main-color); font-weight: 900;">...</span>
+                </div>
+                <div>
+                    <span class="lbl" style="font-size: var(--font-xs); color: #999; display: block; font-weight: 700;">TELAS</span>
+                    <span id="info-conn" class="val" style="font-size: var(--font-sm); color: var(--main-color); font-weight: 900;">...</span>
+                </div>
+            </div>
         </div>
         
         <div class="col-list">
@@ -217,12 +232,6 @@
                 <div id="meta-title" class="meta-title"><span style="color:#fff">SKY</span>&nbsp;GOLD</div>
                 <div id="meta-desc" class="meta-desc"></div>
                 
-                <div id="quick-info-bar" style="display: none; justify-content: space-between; align-items: center; padding: 0 1vw 2vh 1vw; margin-top: auto; flex-shrink: 0;">
-                    <div style="font-size: var(--font-sm); color: #ccc; font-weight: 800;"><i class="fas fa-user" style="color: var(--main-color); margin-right: 8px;"></i> <span id="qi-user">...</span></div>
-                    <div style="font-size: var(--font-sm); color: #ccc; font-weight: 800;"><i class="fas fa-calendar-alt" style="color: var(--main-color); margin-right: 8px;"></i> <span id="qi-exp">...</span></div>
-                    <div style="font-size: var(--font-sm); color: #ccc; font-weight: 800;"><i class="fas fa-tv" style="color: var(--main-color); margin-right: 8px;"></i> <span id="qi-conn">...</span></div>
-                </div>
-
                 <div class="keys">
                     <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000; box-shadow: 0 0 10px #FF0000;"></div> TELA CHEIA</div>
                     <div class="key" id="key-top"><div class="dot" style="background-color:#00C851; box-shadow: 0 0 10px #00C851;"></div> TOPO</div>
@@ -401,7 +410,6 @@
                 this.updateClock();
                 setInterval(function(){ App.updateClock(); }, 60000); 
 
-                // Mostrar a tela de carregamento na inicialização
                 var splash = document.getElementById('splash-screen');
                 if(splash) { splash.style.display = 'flex'; splash.style.opacity = '1'; }
 
@@ -409,7 +417,6 @@
                     document.getElementById('i0').value = localStorage.getItem('rc_h'); document.getElementById('i1').value = localStorage.getItem('rc_u'); document.getElementById('i2').value = localStorage.getItem('rc_p');
                     App.login(true);
                 } else { 
-                    // Esconder a tela de carregamento e mostrar o login se não houver credencial
                     setTimeout(function() {
                         if(splash) {
                             splash.style.opacity = '0';
@@ -480,10 +487,9 @@
                         var created = info.created_at ? new Date(info.created_at*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unknown;
                         document.getElementById('set-user').innerText = info.username || u; document.getElementById('set-exp').innerText = exp; document.getElementById('set-conn').innerText = (info.max_connections || 1); document.getElementById('set-created').innerText = created;
                         
-                        // Atualiza a barra de Quick Info na tela principal
-                        var qiUser = document.getElementById('qi-user'); if(qiUser) qiUser.innerText = info.username || u;
-                        var qiExp = document.getElementById('qi-exp'); if(qiExp) qiExp.innerText = exp;
-                        var qiConn = document.getElementById('qi-conn'); if(qiConn) qiConn.innerText = conn;
+                        var uiUser = document.getElementById('info-user'); if(uiUser) uiUser.innerText = info.username || u;
+                        var uiExp = document.getElementById('info-exp'); if(uiExp) uiExp.innerText = exp;
+                        var uiConn = document.getElementById('info-conn'); if(uiConn) uiConn.innerText = conn;
 
                         App.openMode('live', true);
                     } else { App.setScr(0); document.getElementById('msg-login').innerText = App.i18n[App.cfg.lang].err_auth; localStorage.clear(); }
@@ -503,24 +509,33 @@
             openSettings: function() { this.setScr(3); this.idx = 0; this.updateFocus(); requestNativeFullscreen(); }, 
             closeSettings: function() { App.openMode('live', true); },
 
-            // LÓGICA DE CONTADOR ORIGINAL PRESERVADA INTACTA
             countGlobal: function(mode) {
                 var actionStrm = 'get_live_streams';
-                var t = App.i18n[App.cfg.lang]; var typeStr = t.tot_chan; var countEl = document.getElementById('item-count');
-                var cacheKey = 'rc_total_live_' + App.creds.u; var cached = localStorage.getItem(cacheKey);
-                if(cached) { if(countEl) countEl.innerText = t.tot_pre + cached + " " + typeStr; } else { if(countEl) countEl.innerText = "CONTANDO..."; }
+                var t = App.i18n[App.cfg.lang]; 
+                var typeStr = t.tot_chan; 
+                var countEl = document.getElementById('item-count');
+                var cacheKey = 'rc_total_live_' + App.creds.u; 
+                var cached = localStorage.getItem(cacheKey);
+                
+                if(cached) { if(countEl) countEl.innerText = t.tot_pre + cached + " " + typeStr; } 
+                else { if(countEl) countEl.innerText = "CONTANDO..."; }
 
                 this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm, function(d){
                     if(d && d!=='ERR_NET') {
                         var total = 0; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado'];
-                        if(App.cfg.filter) { for(var i=0; i<d.length; i++) { var nome = (d[i].name || d[i].title || "").toLowerCase(); var show = true; for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } } if(show) total++; } } else { total = d.length; }
+                        if(App.cfg.filter) { 
+                            for(var i=0; i<d.length; i++) { 
+                                var nome = (d[i].name || d[i].title || "").toLowerCase(); var show = true; 
+                                for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } } 
+                                if(show) total++; 
+                            } 
+                        } else { total = d.length; }
                         d = null; try { localStorage.setItem(cacheKey, total); } catch(e) {}
                         if(countEl) countEl.innerText = t.tot_pre + total + " " + typeStr;
                     }
                 });
             },
 
-            // LÓGICA DE ABERTURA ORIGINAL PRESERVADA INTACTA
             openMode: function(mode, isTrusted) {
                 if (!isTrusted && new Date().getTime() - (this.lastScreenSwitch || 0) < 500) return;
                 
@@ -532,9 +547,6 @@
                 mode = 'live'; App.currentMode = mode; PlayerEngine.hardStop(); this.resetInfo(); requestNativeFullscreen();
                 this.playingId = null; this.validCategories = null; this.setScr(2);
                 
-                var qiBar = document.getElementById('quick-info-bar');
-                if (qiBar) { qiBar.style.display = 'flex'; }
-
                 var t = App.i18n[App.cfg.lang]; document.getElementById('search').value = ''; setTimeout(function() { App.countGlobal(mode); }, 500); 
                 
                 var actionCat = 'get_live_categories';
@@ -562,7 +574,6 @@
                 if (i === -1) return; this.idx=i; this.zone=0; this.loadContent(i, true); 
             },
 
-            // LÓGICA DE CARREGAMENTO ORIGINAL PRESERVADA INTACTA
             loadContent: function(catIdx, jumpFocus) {
                 if (catIdx === -1) return; App.showingEpisodes = false; document.getElementById('item-list').innerHTML = ''; this.lastCatIdx = catIdx; 
                 var el = document.getElementById('c'+catIdx); if(!el) return;
@@ -681,7 +692,6 @@
             
             removeAccents: function(s) { if(!s) return ""; var str = s.toLowerCase(); str = str.replace(/[áàãâä]/g, 'a'); str = str.replace(/[éèêë]/g, 'e'); str = str.replace(/[íìîï]/g, 'i'); str = str.replace(/[óòõôö]/g, 'o'); str = str.replace(/[úùûü]/g, 'u'); str = str.replace(/[ç]/g, 'c'); return str; },
 
-            // LÓGICA DE BUSCA ORIGINAL PRESERVADA INTACTA
             doSearch: function(isGlobal) {
                 App.showingEpisodes = false; var rawT = document.getElementById('search').value; 
                 if(rawT.length === 0) { 
