@@ -14,8 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
-        /* Variáveis removidas para compatibilidade com TVs antigas (WebOS antigo, Tizen 2.4, etc). Valores aplicados diretamente. */
-
         * { 
             margin: 0; padding: 0; box-sizing: border-box; outline: none; 
             -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;           
@@ -33,7 +31,6 @@
         .flex-center { display: flex; align-items: center; justify-content: center; }
         .layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; overflow: hidden; }
 
-        /* --- SPLASH SCREEN --- */
         #splash-screen {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: #000; z-index: 999999; display: flex; flex-direction: column;
@@ -280,7 +277,7 @@
         var FavManager = {
             key: 'rc_favs_smart_live', list: [],
             init: function() { var s = localStorage.getItem(this.key); this.list = s ? JSON.parse(s) : []; },
-            toggle: function(id) { var idx = this.list.indexOf(id); if(idx > -1) this.list.splice(idx, 1); else this.list.push(id); localStorage.setItem(this.key, JSON.stringify(this.list)); if (App && App.renderList) App.renderList(false); },
+            toggle: function(id) { var idx = this.list.indexOf(id); if(idx > -1) this.list.splice(idx, 1); else this.list.push(id); localStorage.setItem(this.key, JSON.stringify(this.list)); if (App && App.renderList) App.renderList(); },
             isFav: function(id) { return this.list.indexOf(id) > -1; }
         };
 
@@ -380,7 +377,7 @@
         var App = {
             validCategories: null, scr: 0, zone: 0, idx: 0, lastCatIdx: -1, creds: {}, fullData: [], playingId: null,
             cfg: { filter: false, format: 'ts_native', lang: 'pt' }, userInfo: null, lastEnter: 0,
-            categoryDataCache: null, lastScreenSwitch: 0, lastTap: 0, tapTimer: null, renderLimit: 150,
+            categoryDataCache: null, lastScreenSwitch: 0, lastTap: 0, tapTimer: null, pageSize: 50, mobileRenderedPages: 1,
 
             pad: function(n) { return (n < 10) ? ("0" + n) : n; },
             smartSort: function(a, b) { var nameA = (a.name || a.title || "").toLowerCase(); var nameB = (b.name || b.title || "").toLowerCase(); try { return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }); } catch (e) { return nameA < nameB ? -1 : 1; } },
@@ -399,6 +396,14 @@
 
             init: function() {
                 FavManager.init(); 
+
+                // Event listener para mobile
+                document.getElementById('item-list').addEventListener('scroll', function() { 
+                    var el = this; 
+                    if(el.scrollTop + el.clientHeight >= el.scrollHeight - 50) { 
+                        App.loadMoreMobile(); 
+                    } 
+                });
 
                 if(localStorage.getItem('rc_cfg_filter')) this.cfg.filter = (localStorage.getItem('rc_cfg_filter') === 'true');
                 var savedFmt = localStorage.getItem('rc_cfg_format'); this.cfg.format = (savedFmt === 'm3u8_native' || savedFmt === 'ts_native') ? savedFmt : 'ts_native'; this.cfg.lang = 'pt'; 
@@ -435,7 +440,6 @@
             login: function(isAuto) {
                 var h = document.getElementById('i0').value.trim(); var u = document.getElementById('i1').value.trim(); var p = document.getElementById('i2').value.trim();
                 
-                // FIX: Substituição do endsWith() para TVs antigas
                 if(h.charAt(h.length - 1) === '/') h = h.slice(0, -1); 
                 if(h.indexOf('http') === -1) h = 'http://' + h;
                 
@@ -512,7 +516,8 @@
             openMode: function(isTrusted) {
                 if (!isTrusted && new Date().getTime() - (this.lastScreenSwitch || 0) < 500) return;
                 
-                this.fullData = []; this.categoryDataCache = null; this.lastCatIdx = -1;
+                this.fullData = null; this.categoryDataCache = null;
+                this.fullData = []; this.lastCatIdx = -1;
                 
                 document.getElementById('cat-list').innerHTML = ''; document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>';
                 
@@ -557,44 +562,36 @@
                 var onData = function(d) { 
                     if(d && d!=='ERR_NET') { 
                         var junk = ['adulto','xxx','sex','porn','+18','teste','off'];
+                        App.fullData = null; App.categoryDataCache = null;
                         
-                        App.fullData = []; App.categoryDataCache = null;
-                        
-                        var isFilter = App.cfg.filter;
-                        for(var k=0; k<d.length; k++) { 
-                            var nome = d[k].name || d[k].title || ""; 
-                            d[k]._sn = App.removeAccents(nome);
-                            
-                            var show = true; 
-                            if(isFilter) { 
+                        if(App.cfg.filter) {
+                            var res = []; 
+                            for(var k=0; k<d.length; k++) { 
+                                var nome = (d[k].name || d[k].title || "").toLowerCase(); 
+                                var show = true; 
                                 for(var j=0; j<junk.length; j++) { 
-                                    if(d[k]._sn.indexOf(junk[j]) > -1) { show = false; break; } 
+                                    if(nome.indexOf(junk[j]) > -1) { show = false; break; } 
                                 } 
-                            } 
-                            if(show) App.fullData.push(d[k]); 
+                                if(show) res.push(d[k]); 
+                            }
+                            App.fullData = res;
+                        } else { 
+                            App.fullData = d; 
                         }
                         
                         App.categoryDataCache = App.fullData;
-                        d = null;
-                        
                         if(jumpFocus && App.fullData.length > 0) { App.zone = 2; App.idx = 0; }
-                        App.renderList(false); 
+                        App.renderList(); 
                     } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; }
                 };
 
                 if(cid === 'fav') { 
                     this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_live_streams", function(d){ 
                         if(d && d!=='ERR_NET') { 
-                            App.fullData = []; App.categoryDataCache = null;
-                            for(var x=0; x<d.length; x++) {
-                                var fId = d[x].stream_id || d[x].id;
-                                if(FavManager.isFav(fId)) {
-                                    d[x]._sn = App.removeAccents(d[x].name || d[x].title || "");
-                                    App.fullData.push(d[x]);
-                                }
-                            }
-                            App.categoryDataCache = App.fullData; d = null;
-                            if(jumpFocus && App.fullData.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(false); 
+                            var favs = d.filter(function(x){ var fId = x.stream_id || x.id; return FavManager.isFav(fId); }); 
+                            App.fullData = null; App.categoryDataCache = null;
+                            App.fullData = favs; App.categoryDataCache = favs; 
+                            if(jumpFocus && favs.length > 0) { App.zone = 2; App.idx = 0; } App.renderList(); 
                         } 
                     }); 
                 } 
@@ -605,32 +602,43 @@
                 }
             },
 
-            renderList: function(append) {
-                var d = this.fullData; if(!d) return; var max = d.length; var t = App.i18n[App.cfg.lang]; var listEl = document.getElementById('item-list'); 
+            renderList: function() {
+                var d = this.fullData; var max = d.length; var t = App.i18n[App.cfg.lang]; var listEl = document.getElementById('item-list'); 
                 if(max===0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; return; }
 
-                if(!append) { 
-                    this.renderLimit = 150; 
-                    listEl.innerHTML = ''; 
-                }
+                var currentListIdx = (this.zone === 2) ? this.idx : 0;
+                var currentPage = Math.floor(currentListIdx / this.pageSize); 
+                var start = currentPage * this.pageSize; 
+                var end = Math.min(start + this.pageSize, max);
                 
-                var start = append ? this.renderLimit - 150 : 0;
-                var end = Math.min(max, this.renderLimit);
                 var h = [];
-                
                 for(var i = start; i < end; i++) {
                     var n = d[i].name || d[i].title; var id = d[i].stream_id || d[i].id; var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
                     var playingClass = (App.playingId == id) ? ' playing' : ''; 
                     h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
                 }
+                listEl.innerHTML = h.join(''); 
                 
-                if(append) {
-                    var temp = document.createElement('div'); temp.innerHTML = h.join('');
-                    while(temp.firstChild) { listEl.appendChild(temp.firstChild); }
-                } else {
-                    listEl.innerHTML = h.join('');
+                this.mobileRenderedPages = currentPage + 1;
+                this.updateFocus();
+            },
+
+            loadMoreMobile: function() {
+                var max = this.fullData.length;
+                var start = this.mobileRenderedPages * this.pageSize;
+                if(start >= max) return; 
+                
+                var end = Math.min(start + this.pageSize, max);
+                var h = [];
+                for(var i = start; i < end; i++) {
+                    var n = this.fullData[i].name || this.fullData[i].title;
+                    var id = this.fullData[i].stream_id || this.fullData[i].id;
+                    var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
+                    var playingClass = (App.playingId == id) ? ' playing' : '';
+                    h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
                 }
-                if(!append) this.updateFocus();
+                document.getElementById('item-list').insertAdjacentHTML('beforeend', h.join(''));
+                this.mobileRenderedPages++;
             },
 
             itemClick: function(i, isTrusted) { 
@@ -666,9 +674,7 @@
                 for(var i=0; i<this.fullData.length; i++) { 
                     var id = this.fullData[i].stream_id || this.fullData[i].id; 
                     if(id == this.playingId) { 
-                        this.idx = i; 
-                        if (this.idx >= this.renderLimit) { this.renderLimit = this.idx + 150; this.renderList(false); }
-                        this.updateFocus(); return; 
+                        this.idx = i; this.renderList(); this.updateFocus(); return; 
                     } 
                 } 
             },
@@ -676,7 +682,7 @@
             doSearch: function(isGlobal) {
                 var rawT = document.getElementById('search').value; 
                 if(rawT.length === 0) { 
-                    if(App.lastCatIdx > -1) { App.loadContent(App.lastCatIdx); } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>'; App.fullData = []; App.renderList(false); } return; 
+                    if(App.lastCatIdx > -1) { App.loadContent(App.lastCatIdx); } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-weight: bold; font-size: 2vh; margin-top: 20vh;">&larr; SELECIONE UMA CATEGORIA</div>'; App.fullData = []; App.renderList(); } return; 
                 }
                 if(rawT.length < 2) return; 
                 var tStr = App.removeAccents(rawT); 
@@ -689,13 +695,15 @@
                             var res = []; var maxResults = 100; var junk = ['adulto','xxx','sex','porn','+18'];
                             for(var i=0; i<d.length; i++) { 
                                 var nome = d[i].name || d[i].title || ""; 
-                                d[i]._sn = App.removeAccents(nome);
                                 var show = true;
-                                if(App.cfg.filter) { for(var j=0; j<junk.length; j++) { if(d[i]._sn.indexOf(junk[j]) > -1) { show = false; break; } } }
-                                if(show && d[i]._sn.indexOf(tStr) > -1) { res.push(d[i]); if(res.length >= maxResults) break; } 
+                                if(App.cfg.filter) { 
+                                    var lowerNome = nome.toLowerCase();
+                                    for(var j=0; j<junk.length; j++) { if(lowerNome.indexOf(junk[j]) > -1) { show = false; break; } } 
+                                }
+                                if(show && App.removeAccents(nome).indexOf(tStr) > -1) { res.push(d[i]); if(res.length >= maxResults) break; } 
                             }
                             d = null; 
-                            if (res.length > 0) { res.sort(App.smartSort); App.fullData = res; App.zone = 2; App.idx = 0; App.renderList(false); } 
+                            if (res.length > 0) { res.sort(App.smartSort); App.fullData = res; App.zone = 2; App.idx = 0; App.renderList(); } 
                             else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Nenhum resultado encontrado no servidor global.</div>'; }
                         } else { listEl.innerHTML = '<div style="padding:20px; text-align:center;">Erro na conexão com o servidor.</div>'; }
                     });
@@ -706,10 +714,11 @@
                         if (!baseData || baseData.length === 0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+App.i18n[App.cfg.lang].empty+'</div>'; return; }
                         var res = []; 
                         for(var i=0; i<baseData.length; i++) { 
-                            if(baseData[i]._sn.indexOf(tStr) > -1) { res.push(baseData[i]); } 
+                            var nome = baseData[i].name || baseData[i].title || "";
+                            if(App.removeAccents(nome).indexOf(tStr) > -1) { res.push(baseData[i]); } 
                         }
-                        if (res.length > 0) { App.fullData = res; App.renderList(false); } else { listEl.innerHTML = '<div style="padding:20px; text-align:center; font-size:1.8vh; color:#888;">Não encontrado nesta categoria.<br><br><b style="color:#FFD700;">APERTE ENTER PARA BUSCA GLOBAL</b></div>'; }
-                    }, 10);
+                        if (res.length > 0) { App.fullData = res; App.renderList(); } else { listEl.innerHTML = '<div style="padding:20px; text-align:center; font-size:1.8vh; color:#888;">Não encontrado nesta categoria.<br><br><b style="color:#FFD700;">APERTE ENTER PARA BUSCA GLOBAL</b></div>'; }
+                    }, 50);
                 }
             },
             
@@ -759,8 +768,8 @@
                         while(parentContainer && parentContainer !== document.body) {
                             var style = window.getComputedStyle(parentContainer);
                             if(style.overflowY === 'auto' || style.overflowY === 'scroll') {
-                                parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2);
-                                break;
+                                try { parentContainer.scrollTo({ top: el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2), behavior: 'smooth' }); } 
+                                catch(e) { parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2); } break;
                             }
                             parentContainer = parentContainer.parentElement;
                         }
@@ -780,21 +789,23 @@
                 }
                 else if(s===2) {
                     if(this.zone===3) { if(d===2) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); } return; }
-                    if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; App.renderList(false); } }
+                    if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; App.renderList(); } }
                     else if(this.zone===2) { 
                         var dataLen = App.fullData.length;
                         if(d===1) { 
                             if(typeof this.idx === 'number' && this.idx < dataLen - 1) { 
+                                var oldPage = Math.floor(this.idx / this.pageSize); 
                                 this.idx++; 
-                                if(this.idx >= this.renderLimit - 10 && this.renderLimit < dataLen) {
-                                    this.renderLimit += 150;
-                                    this.renderList(true); 
-                                }
+                                var newPage = Math.floor(this.idx / this.pageSize); 
+                                if (oldPage !== newPage) this.renderList(); 
                             } 
                         }
                         else if(d===0) { 
                             if(typeof this.idx === 'number' && this.idx > 0) { 
+                                var oldPage = Math.floor(this.idx / this.pageSize); 
                                 this.idx--; 
+                                var newPage = Math.floor(this.idx / this.pageSize); 
+                                if (oldPage !== newPage) this.renderList(); 
                             } else if(this.idx === 0) { 
                                 this.zone = 1; 
                             } 
