@@ -19,8 +19,8 @@
     
     <style>
         :root {
-            --bg-deep: #0A0F1C; /* Fundo azul marinho escuro do Smarters */
-            --main-color: #00A8FF; /* Azul brilhante de destaque */
+            --bg-deep: #0A0F1C; 
+            --main-color: #00A8FF; 
             --font-xs: 1.8vh; --font-sm: 2.2vh; --font-md: 3vh; --font-lg: 5vh;
         }
 
@@ -97,7 +97,6 @@
         .menu-top-bar { position: absolute; top: 0; left: 5%; width: 90%; display: flex; justify-content: space-between; align-items: center; padding: 4vh 0; z-index: 10; }
         .menu-date { font-size: 2.5vh; font-weight: bold; color: #ccc; }
         
-        /* Botão Power Redondo */
         .menu-power-btn { 
             width: 6.5vh; height: 6.5vh; 
             border-radius: 50%; 
@@ -111,16 +110,16 @@
 
         .menu-center-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* Espaçamento e ALTURA (height) dos cartões aumentados */
-        .menu-cards-container { display: flex; gap: 4vw; width: 85%; justify-content: center; height: 55vh; margin-bottom: 3vh; }
+        /* Ajuste do Flexbox para Smart TVs antigas: Usando margin em vez de gap */
+        .menu-cards-container { display: flex; width: 85%; justify-content: center; height: 55vh; margin-bottom: 3vh; }
+        .menu-card { flex: 1; margin: 0 2vw; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid transparent; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .menu-card:first-child { margin-left: 0; }
+        .menu-card:last-child { margin-right: 0; }
         
-        /* Cards Coloridos do Smarters */
-        .menu-card { flex: 1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid transparent; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        #m0 { background: linear-gradient(135deg, #5bdec2 0%, #3e51e0 100%); } /* Live TV Teal/Azul */
-        #m1 { background: linear-gradient(135deg, #eb5f6a 0%, #f3a152 100%); } /* Movies Vermelho/Laranja */
-        #m2 { background: linear-gradient(135deg, #a55cd7 0%, #4891db 100%); } /* Series Roxo/Azul */
+        #m0 { background: linear-gradient(135deg, #5bdec2 0%, #3e51e0 100%); } 
+        #m1 { background: linear-gradient(135deg, #eb5f6a 0%, #f3a152 100%); } 
+        #m2 { background: linear-gradient(135deg, #a55cd7 0%, #4891db 100%); } 
         
-        /* Regras para manter as cores e textos corretos no foco */
         #m0.focused { background: linear-gradient(135deg, #5bdec2 0%, #3e51e0 100%) !important; }
         #m1.focused { background: linear-gradient(135deg, #eb5f6a 0%, #f3a152 100%) !important; }
         #m2.focused { background: linear-gradient(135deg, #a55cd7 0%, #4891db 100%) !important; }
@@ -130,21 +129,19 @@
         .menu-card .card-icon { font-size: 10vh; margin-bottom: 2vh; color: #fff; }
         .menu-card .card-title { font-size: 3.5vh; font-weight: 900; letter-spacing: 1px; color: #fff; }
         
-        .menu-btns-container { display: flex; gap: 1.5vw; width: 90%; justify-content: center; }
+        /* Ajuste do Flexbox para os botões abaixo */
+        .menu-btns-container { display: flex; width: 90%; justify-content: center; }
+        .menu-btn { width: 25%; margin: 0 1vw; padding: 1.5vh 0; background: #749c7b; border: 3px solid transparent; border-radius: 8px; font-weight: bold; font-size: 2vh; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .menu-btn i { margin-right: 10px; }
         
-        /* Botão "Minha Conta" Reduzido */
-        .menu-btn { width: 25%; padding: 1.5vh 0; background: #749c7b; border: 3px solid transparent; border-radius: 8px; font-weight: bold; font-size: 2vh; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        
-        /* Informações do Rodapé Aumentadas */
         .menu-footer { position: absolute; bottom: 0; left: 5%; width: 90%; display: flex; justify-content: space-between; padding: 4vh 0; font-size: 2.5vh; color: #888; font-weight: 600; z-index: 10; }
         
         .menu-card.focused { border: 3px solid #fff !important; transform: scale(1.05) translateZ(0) !important; }
-        
-        /* Mantém o ícone e título branco no foco */
         .menu-card.focused .card-icon, .menu-card.focused .card-title { color: #ffffff !important; }
 
-        .config-row { display: flex; gap: 1vw; margin: 2vh 0; }
-        .toggle-btn { flex: 1; padding: 1.5vh; background: #1a1a1a; border: 1px solid #333; color: #888; font-size: var(--font-sm); font-weight: 800; border-radius: 1vh; }
+        /* Ajustes de espaçamento em Configurações */
+        .config-row { display: flex; margin: 2vh 0; }
+        .toggle-btn { flex: 1; margin: 0 0.5vw; padding: 1.5vh; background: #1a1a1a; border: 1px solid #333; color: #888; font-size: var(--font-sm); font-weight: 800; border-radius: 1vh; }
         .info-row { display: flex; justify-content: space-between; padding: 1vh 0; border-bottom: 1px solid #222; font-size: var(--font-sm); color: #ccc; }
         
         #content-layer { display: flex; width: 100%; height: 100%; background: var(--bg-deep); overflow: hidden; }
@@ -186,8 +183,11 @@
         .meta-title { font-size: var(--font-lg); color: var(--main-color); font-weight: 900; margin-bottom: 1vh; }
         .meta-desc { font-size: var(--font-sm); color: #999; margin-bottom: 1vh; }
         
-        .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid rgba(255,255,255,0.05); margin-top: auto; flex-shrink: 0; }
-        .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 700; background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+        /* Ajuste do Flexbox para as legendas coloridas */
+        .keys { display: flex; justify-content: space-between; align-items: center; padding-top: 2vh; border-top: 2px solid rgba(255,255,255,0.05); margin-top: auto; flex-shrink: 0; }
+        .key { flex: 1; margin: 0 0.5vw; font-size: var(--font-xs); color: #fff; font-weight: 700; background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+        .key:first-child { margin-left: 0; }
+        .key:last-child { margin-right: 0; }
         .dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
 
         #episodes-layer { background: rgba(0,0,0,0.8); z-index: 99999; }
@@ -460,7 +460,7 @@
 
         var App = {
             validCategories: null, scr: 0, prevScr: 0, zone: 0, idx: 0, lastCatIdx: -1, lastGridIdx: 0, creds: {}, fullData: [], playingId: null,
-            episodesData: [], currentEpIndex: null, isMoving: false,
+            episodesData: [], currentEpIndex: null, isMoving: false, renderTimer: null,
             cfg: { filter: false, format: 'ts_native', lang: 'pt' }, userInfo: null, lastEnter: 0,
             categoryDataCache: null, currentMode: 'live', lastScreenSwitch: 0, clockTimer: null,
 
@@ -677,6 +677,7 @@
                 }
             },
 
+            // NOVA FUNÇÃO RENDER LIST (Renderização Loteada para NÃO travar Smart TVs fracas)
             renderList: function() {
                 var d = this.fullData; var max = d.length; var t = App.i18n[App.cfg.lang]; 
                 var listEl = document.getElementById('item-list'); var gridEl = document.getElementById('grid-list');
@@ -685,25 +686,43 @@
                 var emp = '<div style="padding:20px; text-align:center; width:100%;">'+t.empty+'</div>';
                 if(max===0) { listEl.innerHTML = emp; gridEl.innerHTML = emp; return; }
 
-                if(this.currentMode === 'live') {
+                if(this.renderTimer) clearTimeout(this.renderTimer);
+                listEl.innerHTML = ''; gridEl.innerHTML = '';
+
+                var isLive = (this.currentMode === 'live');
+                var chunkSize = 150;
+                var i = 0;
+                var that = this;
+                var fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+                function renderNextChunk() {
                     var h = [];
-                    for(var i = 0; i < max; i++) {
-                        var n = d[i].name || d[i].title; var id = d[i].stream_id; var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
-                        var playingClass = (App.playingId == id) ? ' playing' : ''; 
-                        h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
+                    var end = Math.min(i + chunkSize, max);
+                    
+                    for(; i < end; i++) {
+                        if(isLive) {
+                            var n = d[i].name || d[i].title; var id = d[i].stream_id; var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
+                            var playingClass = (that.playingId == id) ? ' playing' : ''; 
+                            h.push('<div class="item' + playingClass + '" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+', true)">'+n+icn+'</div>');
+                        } else {
+                            var nome = d[i].name || d[i].title; var img = d[i].stream_icon || d[i].cover || fallback;
+                            h.push('<div class="grid-item" id="row-'+i+'" onclick="App.itemClick('+i+', true)">');
+                            h.push('<img src="'+img+'" loading="lazy" onerror="this.src=\''+fallback+'\'">');
+                            h.push('<div class="title">'+nome+'</div></div>');
+                        }
                     }
-                    listEl.innerHTML = h.join(''); 
-                } else { 
-                    var gh = []; var fallback = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-                    for(var j = 0; j < max; j++) {
-                        var nome = d[j].name || d[j].title; var img = d[j].stream_icon || d[j].cover || fallback;
-                        gh.push('<div class="grid-item" id="row-'+j+'" onclick="App.itemClick('+j+', true)">');
-                        gh.push('<img src="'+img+'" loading="lazy" onerror="this.src=\''+fallback+'\'">');
-                        gh.push('<div class="title">'+nome+'</div></div>');
+                    
+                    if(isLive) { listEl.insertAdjacentHTML('beforeend', h.join('')); } 
+                    else { gridEl.insertAdjacentHTML('beforeend', h.join('')); }
+
+                    if(i < max) {
+                        that.renderTimer = setTimeout(renderNextChunk, 15);
                     }
-                    gridEl.innerHTML = gh.join('');
                 }
-                this.updateFocus();
+
+                // Começa a desenhar os blocos e atualiza o foco inicial
+                renderNextChunk();
+                setTimeout(function(){ that.updateFocus(); }, 50);
             },
 
             itemClick: function(i, isTrusted) { 
@@ -916,7 +935,7 @@
                 if(el) { 
                     el.classList.add('focused'); 
                     if(el.tagName==='INPUT') { try { el.focus({preventScroll:true}); } catch(e) { el.focus(); } } 
-                    else { var inps = document.querySelectorAll('input'); for(var i=0; i<inps.length; i++) { inps[i].blur(); } if (document.activeElement && document.activeElement !== document.body) { try { document.activeElement.blur(); } catch(e) {} } } 
+                    else { var inps = document.querySelectorAll('input'); for(var i=0; i<inps.length; i++) { inps[i].blur(); } if (document.activeElement && document.activeElement !== document.activeElement.body) { try { document.activeElement.blur(); } catch(e) {} } } 
                     
                     if(el.tagName!=='INPUT') {
                         var parentContainer = el.parentElement;
