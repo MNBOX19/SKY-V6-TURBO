@@ -94,11 +94,11 @@
         .btn { width: 100%; padding: 16px; margin-top: 20px; background: var(--main-color); color: #000; border: none; font-weight: 900; border-radius: 8px; font-size: 16px; }
         .btn-logout { background: #333; color: #fff; margin-top: 10px; border: 1px solid #444; }
 
+        /* Remoção de gap para compatibilidade */
         .menu-top-bar { position: absolute; top: 0; left: 5%; width: 90%; display: flex; justify-content: space-between; align-items: center; padding: 4vh 0; z-index: 10; }
-        .menu-top-left { display: flex; align-items: center; gap: 2vw; }
+        .menu-top-left { display: flex; align-items: center; } 
         .menu-date { font-size: 3vh; font-weight: bold; color: #ccc; margin-left: 20px; }
         
-        /* Botão Power Refinado SEM CÍRCULO - Fica azul apenas ao selecionar */
         .menu-power-btn { 
             width: auto; height: auto; padding: 1vh;
             border: none; background: transparent !important;
@@ -111,11 +111,15 @@
 
         .menu-center-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 6vh; }
         
-        .smarters-grid { display: flex; width: 85%; height: 55vh; gap: 2vw; }
-        .smarters-left { flex: 0 0 35%; display: flex; }
-        .smarters-right { flex: 1; display: flex; flex-direction: column; gap: 2vh; }
-        .smarters-right-top { flex: 1; display: flex; gap: 2vw; }
-        .smarters-right-bottom { height: 9vh; display: flex; gap: 2vw; }
+        /* Solução para não ficar grudado em TVs antigas (Usando Margins em vez de Gap) */
+        .smarters-grid { display: flex; width: 85%; height: 55vh; }
+        .smarters-left { flex: 0 0 35%; display: flex; margin-right: 2vw; }
+        .smarters-right { flex: 1; display: flex; flex-direction: column; }
+        .smarters-right-top { flex: 1; display: flex; margin-bottom: 2vh; }
+        .smarters-right-bottom { height: 9vh; display: flex; }
+        
+        .smarters-right-top > div:first-child { margin-right: 2vw; }
+        .smarters-right-bottom > div:first-child { margin-right: 2vw; }
 
         .menu-card { flex: 1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid transparent; transition: transform 0.2s; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
         
